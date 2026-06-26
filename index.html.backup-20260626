@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta https-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Rupam Bhattacharya - Software Developer </title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width">
+  <link rel='shortcut icon' type='image/x-icon' href='favicon.ico' />
+  <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-72x72-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-114x114-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-144x144-precomposed.png">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/normalize.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
+  <script src="js/vendor/jquery.hashchange.min.js"></script>
+  <script src="js/vendor/jquery.easytabs.min.js"></script>
+
+  <script src="js/main.js"></script>
+  <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+      <script>window.html5 || document.write('<script src="js/vendor/html5shiv.js"><\/script>')</script>
+      <![endif]-->
+</head>
+  <body class="bg-fixed bg-1">
+<!--[if lt IE 7]>
+    <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+    <![endif]-->
+   <div class="main-container">
+    <div class="main wrapper clearfix">
+      <!-- Header Start -->
+        <header id="header">
+            <div id="logo">
+                <h2>
+                    Rupam Bhattacharya
+                </h2>
+                <h4>
+                    Software Developer
+                </h4>
+            </div>
+        </header>
+        <!-- Header End -->
+        <!-- Main Tab Container -->
+        <div id="tab-container" class="tab-container">
+          <!-- Tab List -->
+            <ul class='etabs'>
+                <li class='tab' id="tab-about">
+                  <a href="#about"><i class="icon-user"></i><span> About Me</span></a>
+                </li>
+                <li class='tab'>
+                  <a href="#resume"><i class="icon-file-text"></i><span> Resume</span></a>
+                </li>
+                <li class='tab'>
+                  <a href="#projects"><i class="icon-file-text"></i><span> Projects</span></a>
+                </li>
+                <li class='tab'>
+                  <a href="#personal"><i class="icon-info"></i><span> Personal</span></a>
+                </li>
+                <li class='tab'>
+                  <a href="#blogs"><i class="icon-heart"></i><span> Blogs</span></a>
+                </li>
+
+            </ul>
+          <!-- End Tab List -->
+            <div id="tab-data-wrap">
+              <!-- About Tab Data -->
+                <div id="about">
+                    <section class="clearfix">
+                        <div>
+                            <div class="photo">
+                                <img src="2.jpg" alt="Rupam Bhattacharya">
+                            </div>
+                            <div class="info">
+                                <h2>
+                                    Rupam Bhattacharya
+                                </h2>
+                                <h4>
+                                    Software Developer
+                                </h4>
+                                <p>
+                                I am a software developer currently based out of Munich, Germany. I have more than six years of experience.
+
+
+                                My area of interest includes data science, designing and creating high level architectural designs for large systems, autonomous driving, Internet of Things, natural language processing, blockchain, developing intelligent speech assistants and chatbots.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="break"></div>
+                        <div class="contact-info">
+                          <div class="g1">
+                            <div class="item-box clearfix">
+                              <i class="icon-envelope"></i>
+                              <div class="item-data">
+                                <h3><a href="mailto:rupam.speaks@gmail.com">Email</a></h3>
+
+                              </div>
+                            </div>
+                          </div>
+                          <div class="g1">
+                            <div class="item-box clearfix">
+                              <i class="icon-github"></i>
+                              <div class="item-data">
+                                <h3><a href="https://github.com/rupambhattacharya">Github</a></h3>
+
+                              </div>
+                            </div>
+                          </div>
+                          <div class="g1">
+                            <div class="item-box clearfix">
+                              <i class="icon-linkedin"></i>
+                              <div class="item-data">
+                                <h3><a href="https://www.linkedin.com/in/rupam-bhattacharya-29884714/">Linkedin</a></h3>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    </section><!-- content -->
+                </div>
+              <!-- End About Tab Data -->
+              <!-- Resume Tab Data -->
+                <div id="resume">
+                    <section class="clearfix">
+                        <div class="g2">
+                            <h3>
+                                Work Experience
+                            </h3>
+                            <ul class="no-list work">
+                                <li>
+                                    <h5>
+                                        Backend Developer, Burda Forward GmbH, Munich (Germany)
+                                    </h5><span class="label label-info">October 2018 - Present </span>
+                                    <p>
+                                      1. Develop a Content Platform for publishers in Germany from scratch
+                                      <br>
+                                      2. Tools and Technologies included nodejs, Python, Java, AWS (API Gateway, Cognito, Dynamo DB, S3, Elastic Search, Redis, Athena, SNS, SQS, Couldwatch, IAM, SSM, EC2, Step Functions, AWS SDK, AWS Code Commit, AWS Code Pipeline), GraphQL, Docker, Grafana, Serverless, Continuous Integraton and Delivery, Jenkins, Git, SourceTree.
+                                    </p>
+                                </li>
+                                <li>
+                                    <h5>
+                                        Software Developer, AutoScout24 GmbH, Munich (Germany)
+                                    </h5><span class="label label-info">June 2018 - September 2018 </span>
+                                    <p>
+                                      1. Applying machine learning to improve user experience on platform
+                                      <br>
+                                      2. Backend Development for listings on platform
+                                    </p>
+                                </li>
+                                <li>
+                                    <h5>
+                                        Software Developer, Motius GmbH, Munich (Germany)
+                                    </h5><span class="label label-info">September 2017 - February 2018</span>
+                                    <p>
+                                      1. Integration of Amazon Alexa as a voice command system into the operating room of Richard Wolf.
+                                      <br>
+                                      2. Development of Alexa Skills in nodejs, python and deployment in AWS
+                                      <br>
+                                      3. Designing of Architecture to communicate with API’s
+                                      <br>
+                                      4. Continuous Integration wIth Gitlab CI
+                                    </p>
+                                </li>
+                                <li>
+                                    <h5>
+                                        Master Thesis Intern, BMW Group, Munich (Germany)
+                                    </h5><span class="label label-info">September 2016 - May 2017</span>
+                                    <p>
+                                      1. Deep Learning Researcher at BMW Innovation Lab
+                                      <br>
+                                      2. Responsibility included working on BMW Car Streaming Data to increase the insight on driving patterns, sequential learning using recurrent neural networks, developing Apache Spark solution, data preprocessing and data storage.
+                                    </p>
+                                </li>
+                                <li>
+                                    <h5>
+                                        Data Analyst Intern, Airbus Group Innovations, Munich (Germany)
+                                    </h5><span class="label label-info">February 2016 - July 2016</span>
+                                    <p>
+                                      1. Tasks included Virtual Flight Simulation using XPlane and ROS, Image Processing, Data Visualisation using Qlik View and Qlik Sense
+                                      <br>
+                                      2. Data Center Setup at Airbus Defence and Space, Manching
+                                    </p>
+                                </li>
+                                <li>
+                                <h5>
+                                    Programmer Analyst, Cognizant Technology Solutions, Kolkata (India)
+                                </h5><span class="label label-info">December 2011- August 2014</span>
+                                <p>
+                                  1. Java EE Developer for clients like Delta Airlines, Travelers Insurance Canada, PHH Mortgage, Facility Maintenance
+                                  <br>
+                                  2. Technologies included Struts 2, Spring MVC, Hibernate, GWT, EJB and Liferay
+                                </p>
+                                </li>
+                            </li>
+                            </ul>
+                            <h3>
+                                Education
+                            </h3>
+                            <ul class="no-list work">
+                                <li>
+                                    <h5>
+                                       Master of Science in Computer Science, Technical University of Munich, Germany
+                                    </h5><span class="label label-success">April 2015- May 2018</span>
+                                    <p>
+                                        1. Specialisation in Distributed Systems & Artifical Intelligence
+                                        <br>
+                                        2. Master Thesis - Leveraging Deep Learning Solutions for Predictive Maintenance of Batteries in Industrial Datasets
+                                    </p>
+                                </li>
+                                <li>
+                                    <h5>
+                                        Bachelor of Technology in Information Technology, West Bengal University of Technology, India
+                                    </h5><span class="label label-success">July 2007- July 2011</span>
+                                    <p>
+                                        1. Specialisation in Software Engineering
+                                        <br>
+                                        2. Bachelor Thesis - Web Based Learning Management System
+                                    </p>
+                                </li>
+                                <li>
+                                    <h5>
+                                        Bachelor of Arts in Indian Classical Music, Bhatkhande Music Institute, India
+                                    </h5><span class="label label-success">February 2004- February 2007</span>
+                                    <p>
+                                        1. Specialisation in Vocals and Performing Arts
+                                    </p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="g1">
+                            <div class="sidebar">
+                                <h3>
+                                    Skills
+                                </h3>
+                                <h5>
+                                    Programming Language
+                                </h5>
+                                <div class="meter asbestos">
+                                    <span style="width: 80%"><span>Python</span></span>
+                                </div>
+                                <div class="meter emerald">
+                                    <span style="width: 80%"><span>Java</span></span>
+                                </div>
+                                <div class="meter carrot">
+                                    <span style="width: 60%"><span>C++</span></span>
+                                </div>
+                                <div class="meter wisteria">
+                                    <span style="width: 85%"><span>JavaScript</span></span>
+                                </div>
+                                <div class="meter sunflower">
+                                    <span style="width: 60%"><span>Scala</span></span>
+                                </div>
+                                  <div class="meter midnight">
+                                      <span style="width: 50%"><span>.Net</span></span>
+                                  </div>
+                                <div class="break"></div>
+                                <h5>
+                                    Machine Learning
+                                </h5>
+                                <div class="meter emerald">
+                                    <span style="width: 70%"><span>Tensorflow</span></span>
+                                </div>
+                                <div class="meter carrot">
+                                    <span style="width: 80%"><span>Keras</span></span>
+                                </div>
+                                <div class="meter wisteria">
+                                    <span style="width: 60%"><span>Caffe</span></span>
+                                </div>
+                                <div class="meter sunflower">
+                                    <span style="width: 70%"><span>R</span></span>
+                                </div>
+                                <div class="meter midnight">
+                                    <span style="width: 80%"><span>RapidMiner</span></span>
+                                </div>
+                                <div class="break"></div>
+                                <h5>
+                                    Cloud
+                                </h5>
+                                <div class="meter asbestos">
+                                    <span style="width: 90%"><span>AWS</span></span>
+                                </div>
+                                <div class="meter emerald">
+                                    <span style="width: 60%"><span>Azure</span></span>
+                                </div>
+                                <div class="meter carrot">
+                                    <span style="width: 50%"><span>Google Cloud</span></span>
+                                </div>
+                                <div class="break"></div>
+                                <h5>
+                                    Web Frameworks
+                                </h5>
+                                <div class="meter asbestos">
+                                    <span style="width: 70%"><span>Struts</span></span>
+                                </div>
+                                <div class="meter emerald">
+                                    <span style="width: 60%"><span>Spring</span></span>
+                                </div>
+                                <div class="meter midnight">
+                                    <span style="width: 80%"><span>Hibernate</span></span>
+                                </div>
+                                <div class="meter sunflower">
+                                    <span style="width: 70%"><span>Django</span></span>
+                                </div>
+                                <div class="meter carrot">
+                                    <span style="width: 60%"><span>React</span></span>
+                                </div>
+                                <div class="meter wisteria">
+                                    <span style="width: 40%"><span>Vue</span></span>
+                                </div>
+                                <div class="break"></div>
+                                <h5>
+                                    Miscellaneous
+                                </h5>
+                                <div class="meter asbestos">
+                                    <span style="width: 70%"><span>ROS</span></span>
+                                </div>
+                                <div class="meter emerald">
+                                    <span style="width: 90%"><span>Alexa</span></span>
+                                </div>
+                                <div class="meter carrot">
+                                    <span style="width: 70%"><span>Docker</span></span>
+                                </div>
+                                <div class="meter wisteria">
+                                    <span style="width: 50%"><span>Kubernetes</span></span>
+                                </div>
+                                <div class="meter sunflower">
+                                    <span style="width: 90%"><span>Elastic Search</span></span>
+                                </div>
+                                <div class="meter emerald">
+                                    <span style="width: 70%"><span>Continuous Integration</span></span>
+                                </div>
+                                <div class="meter asbestos">
+                                    <span style="width: 80%"><span>GPU</span></span>
+                                </div>
+                                <div class="meter midnight">
+                                    <span style="width: 60%"><span>MQTT</span></span>
+                                </div>
+                                <div class="meter sunflower">
+                                    <span style="width: 90%"><span>Jest</span></span>
+                                </div>
+                                <div class="meter carrot">
+                                    <span style="width: 90%"><span>ES Lint</span></span>
+                                </div>
+                              </div>
+                            </div>
+                            </section>
+                        </div>
+                        <div id="projects">
+                          <div>
+                            <section class="clearfix">
+                              <ul class="no-list work">
+                                  <li>
+                                      <h5>
+                                          Develop a Content Platform for publishers in Germany from scratch
+                                      </h5>
+                                      <span class="label label-info"> October 2018 - Present </span>
+                                      <br>
+                                      <span class="label label-inf"> AutoScout24 GmbH, Munich </span>
+                                      <p>
+                                        1. Authentication and authorization for users
+                                        <br>
+                                        2. Adapters for aggregation of data from different sources
+                                        <br>
+                                        3. Building data lake using event sourcing and queues
+                                        <br>
+                                        4. APIs to post, update, delete and read 
+                                        <br>
+                                        5. Implementing search endpoint by API users using Elastic Search indices
+                                        <br>
+                                        6. Aggregated Logging for each events using Cloudwatch, Lambda and Elastic Search
+                                        <br>
+                                        7. Alerting and Monitoring using Grafana and Cloudwatch
+                                        <br>
+                                        8. Building infrastructure as code using serverless framework
+                                        <br>
+                                        9. Code Styling using ES Lint and Unit Tests using Jest
+                                        <br>
+                                        10. Scrum Master Role for Sprint Meetings
+                                        <br>
+                                        11. Team Size : 7
+                                      </p>
+                                  </li>
+                                  <li>
+                                      <h5>
+                                          Building proxy meta service for better advertising
+                                      </h5>
+                                      <span class="label label-info"> February 2018 - April 2018 </span>
+                                      <br>
+                                      <span class="label label-inf"> Burda Forward GmbH, Munich </span>
+                                      <p>
+                                        1. Building proxy meta service to query Hyscore - a meta service provider for 10 million users visiting https://focus.de daily to serve better advertisements
+                                        <br>
+                                        2. Implementation of APIs and cache using Redis ElastiCache
+                                        <br>
+                                        3. Alerting and Monitoring using Grafana and Cloudwatch
+                                        <br>
+                                        4. Building infrastructure as code using serverless framework
+                                        <br>
+                                        5. Code Styling using ES Lint and Unit Tests using Jest
+                                        <br>
+                                        6. Team Size : 2
+                                      </p>
+                                  </li>
+                                  <li>
+                                      <h5>
+                                          Semantic Labeling of Vehicles
+                                      </h5>
+                                      <span class="label label-info"> August 2018 - September 2018 </span>
+                                      <br>
+                                      <span class="label label-inf"> AutoScout24 GmbH, Munich </span>
+                                      <p>
+                                        1. Applying machine learning to categorize cars as sports, family or others
+                                        <br>
+                                        2. Research on vehicle types
+                                        <br>
+                                        3. Team Size : 3
+                                      </p>
+                                  </li>
+                                  <li>
+                                      <h5>
+                                          View Point Estimation of Cars
+                                      </h5>
+                                      <span class="label label-info"> June 2018 - August 2018 </span>
+                                      <br>
+                                      <span class="label label-inf"> AutoScout24 GmbH, Munich </span>
+                                      <p>
+                                        1. Classification of view points of cars in order to sort listing images automatically according to their labels
+                                        <br>
+                                        2. Transfer Learning with VGGNet and ResNet Model
+                                        <br>
+                                        3. Team Size : 2
+                                      </p>
+                                  </li>
+                                  <li>
+                                      <h5>
+                                        Integrate Amazon​ ​Alexa​ ​as​ ​Assistant ​for Endoscopy Operations
+                                      </h5>
+                                      <span class="label label-info"> August 2017 - February 2018 </span>
+                                      <br>
+                                      <span class="label label-inf"> Motius GmbH, Munich </span>
+                                      <p>
+                                        1. Development of Alexa Skills in nodejs and deployment in AWS
+                                        <br>
+                                        2. Designing of Architecture to communicate with API’s
+                                        <br>
+                                        3. Documentation of work
+                                        <br>
+                                        4. Team Size : 3
+                                      </p>
+                                  </li>
+                                  <li>
+                                      <h5>
+                                          Deep​ ​Learning​ ​Solutions​ for​ ​Predictive​ ​Maintenance​ ​of​ ​Batteries​ ​in​ ​Cars
+                                      </h5>
+                                      <span class="label label-info"> ​September​ ​2016-​ ​May​ ​2017 </span>
+                                      <br>
+                                      <span class="label label-inf"> BMW​ ​Innovation​ ​Lab,​ ​Munich </span>
+                                      <p>
+                                        1. Application of Sequence Learning to represent driving profiles and understand patterns
+that leads to failures in batteries in cars
+                                        <br>
+                                        2. Algorithms - Recurrent Neural Network (Grid LSTM)
+                                        <br>
+                                        3. Implementation in Keras and Tensorflow using Python
+                                        <br>
+                                        4. Deployment in Apache Spark (pySpark) and AWS
+                                        <br>
+                                        5. Documentation of Work
+                                        <br>
+                                        6. Team Size : 3
+                                      </p>
+                                  </li>
+                                  <li>
+                                  <h5>
+                                      Deep​ ​Traffic​ ​Sign​ ​Detection​ ​on​ ​a​ ​Driving​ ​Simulator
+                                  </h5>
+                                  <span class="label label-info"> ​​ ​October​ ​2016​ ​-​ ​March​ ​2017 </span>
+                                  <br>
+                                  <span class="label label-inf"> TU ​Munich </span>
+                                  <p>
+                                    1. Build a tool chain for integration of deep learning model for traffic road sign detection
+in a simulation environment
+                                    <br>
+                                    2. Training the model with dataset from real world images for object detection and
+classification and evaluation of model on images from simulator
+                                    <br>
+                                    3. Algorithms - Region based Fully Convolutional Network
+                                    <br>
+                                    4. Implementation in Caffe using Python
+                                    <br>
+                                    5. Team Size : 4
+                                  </p>
+                                  <h5>
+                                      Robust​ ​Verification​ ​of​ ​Autonomous​ ​Cars​ ​with​ ​respect​ ​to​ ​Uncertain​ ​Parameters
+                                  </h5>
+                                  <span class="label label-info"> ​April​ ​2016​ ​-​ ​July​ ​2016 </span>
+                                  <br>
+                                  <span class="label label-inf"> ​ ​TU​ ​Munich </span>
+                                  <p>
+                                    1. Linear Parameter Varying Modeling of Autonomous cars
+                                    <br>
+                                    2. Ascertaining relationship between dynamics of cars with respect to uncertain
+parameters like wind, rains, etc.
+                                    <br>
+                                    3. Team Size : 2
+                                  </p>
+                                  <h5>
+                                      Virtual​ ​Flight​ ​Simulation
+                                  </h5>
+                                  <span class="label label-info"> ​​February​ ​2016​ ​-​ ​July​ ​2016 </span>
+                                  <br>
+                                  <span class="label label-inf"> Airbus​ ​Group​ ​Innovations,​ ​Munich </span>
+                                  <p>
+                                    1. Creating ROS plugins for X-Plane flight simulator and corresponding nodes to record
+simulation flight data
+                                    <br>
+                                    2. Creating Dashboards with QlikView/QlikSense to visualize simulated flight data and
+near real time flight parameter tracking and warnings
+                                    <br>
+                                    3. Image Processing using Convolutional Neural Networks
+                                    <br>
+                                    4. Implementation of Autonomous Landing and Cesium 3D Air Traffic Display
+                                    <br>
+                                    5. Setting up of simulation environment in datacenter at Airbus Defense & Space, Manching,
+Germany
+                                    <br>
+                                    6. Team Size : 5
+                                  </p>
+                                  <h5>
+                                      Pollution​ ​and​ ​Weather​ ​Monitor
+                                  </h5>
+                                  <span class="label label-info"> ​​November 2015​ ​-​ ​April​ ​2016 </span>
+                                  <br>
+                                  <span class="label label-inf"> ​Audi​ ​App​ ​Challenge​ ​2015, Ingolstadt </span>
+                                  <p>
+                                    1. An android app that monitors the air pollution through out the world by using sensors
+in cars
+                                    <br>
+                                    2. Use pollution sensors, gas sensors, flame sensors, temperature sensors, precipitation
+sensors in order to get the real time weather and pollution data at each node of a city
+                                    <br>
+                                    3.  Pollution Routing
+                                    <br>
+                                    4. Technologies - Java, Android, MQTT, Python
+                                    <br>
+                                    5. Team Size : 4
+                                  </p>
+                                  <h5>
+                                      Tool​ ​Cloud-​ ​Cross-company​ ​Lifecycle​ ​Management​ ​for​ ​Tools​ ​in​ ​the​ ​Cloud
+                                  </h5>
+                                  <span class="label label-info"> ​November​ ​2015​ ​- February​ ​2016 </span>
+                                  <br>
+                                  <span class="label label-inf"> Institute​ ​for​ ​Materials​ ​Handling, ​Material​ ​Flow and ​Logistics,​ ​TU​ ​Munich </span>
+                                  <p>
+                                    1. Requirement Analysis
+                                    <br>
+                                    2. Database Designing
+                                    <br>
+                                    3. Web and Android Applications Development and Maintenance
+                                    <br>
+                                    4. Technologies: Java, Industry 4.0, Android, Web Services, JQuery, JavaScript, EPCIS
+                                    <br>
+                                    5. Team Size : 2
+                                  </p>
+                                  <h5>
+                                      Industry​ ​4.0​ ​-​ ​Industrial​ ​Automation
+                                  </h5>
+                                  <span class="label label-info"> ​​April​ ​2015​ ​-​ ​November​ ​2015 </span>
+                                  <br>
+                                  <span class="label label-inf"> Fraunhofer​ ​IWB​ ​ ​and Department​ ​of​ ​Mechanical​ ​Engineering,​ ​TU​ ​Munich </span>
+                                  <p>
+                                    1. Project​ ​Details​ ​-​ ​https://www.academia.edu/20924531/Industry_4.0_Prototype
+                                    <br>
+                                    2. Building and implementing architecture for the project
+                                    <br>
+                                    3. Build and develop all the required functionalities to adapt to all industrial automation
+standards for developing an automation solution to interact with Bluetooth, OPC-UA and
+Wifi enabled sensors and actuators
+                                    <br>
+                                    4. Predicting Tool Wear with data obtained from sensor
+                                    <br>
+                                    5. Integrating prediction results in the architecture and issuing warnings to GUI
+                                    <br>
+                                    6. Research of relevant literature and implementation of machine learning algorithms
+                                    <br>
+                                    7. Technologies used - WiFi, OPC-UA, Android, Rapid Miner, Apache Splunk, Eclipse Kura,
+AngularJS, Java, OSGi, MQTT, Bluetooth
+                                    <br>
+                                    8. Team Size : 4
+                                  </p>
+                                  <h5>
+                                      Cloud​ ​Monitoring
+                                  </h5>
+                                  <span class="label label-info"> ​​June​ ​2015​ ​-​ ​August​ ​2015 </span>
+                                  <br>
+                                  <span class="label label-inf"> Fraunhofer​ ​AISEC,​ ​Munich </span>
+                                  <p>
+                                    1. Analysis & Implementation of appropriate Mining & Machine Learning methods for
+monitoring data from Cloud services
+                                    <br>
+                                    2. Design & implementation of user interfaces for capturing security requirements
+                                    <br>
+                                    3. Implementation of additional functionalities of the existing prototypes
+                                    <br>
+                                    4. Technologies: Machine Learning, Java, OpenVas, ZAP, W3af
+                                    <br>
+                                    6. Team Size : 2
+                                  </p>
+                                  <h5>
+                                      Yelp​ ​Geo-Spatial​ ​Dataset​ ​Challenge​ ​2015
+                                  </h5>
+                                  <span class="label label-info"> ​April ​2015-​ ​July 2015 </span>
+                                  <br>
+                                  <span class="label label-inf"> TU​ ​Munich </span>
+                                  <p>
+                                    1. Data Preprocessing, Data Transformation and Visualization
+                                    <br>
+                                    2. Descriptive Mining and Predictive Mining
+                                    <br>
+                                    3. Infer Seasonal Trends and Categories, Predicition of Stars from User Reviews using
+Sentiment Analysis
+                                    <br>
+                                    4. Location Mining & Urban Planning
+                                    <br>
+                                    5. Technologies - Rapid Miner, Weka, R, Python, Streaming APIs, Ngram
+                                    <br>
+                                    6. Team Size : 5
+                                  </p>
+                                  <h5>
+                                      Twitter​ ​Mining
+                                  </h5>
+                                  <span class="label label-info"> March 2015 </span>
+                                  <br>
+                                  <span class="label label-inf"> Ecole Telecom Paris </span>
+                                  <p>
+                                    1. Analysis of data collected from Twitter with the objective of finding interesting
+information and patterns
+                                    <br>
+                                    2.  Data Cleaning and Preprocessing
+                                    <br>
+                                    3. Extracting Dense Sub-graphs from the filtered data
+                                    <br>
+                                    4. Analyzing the sub-graphs to find interesting information
+                                    <br>
+                                    5. Algorithm - Page Rank and Hadoop Map Reduce
+                                    <br>
+                                    6.Technologies - Java, JGraphT, Streaming APIs
+                                    <br>
+                                    7. Team Size : 4
+                                  </p>
+                                  <h5>
+                                      Delta​ ​Polaris​ ​​(Delta​ ​Airlines)
+                                  </h5>
+                                  <span class="label label-info"> ​April 2012 -​ August 2014 </span>
+                                  <br>
+                                  <span class="label label-inf"> Cognizant​ ​Technology​ ​Solutions,​ ​Kolkata </span>
+                                  <p>
+                                    1. Designing and developing applications with MVC2 Web framework, using the front
+controller design pattern like Struts 2
+                                    <br>
+                                    2. Designing the logical and physical data model, generated DDL scripts, and writing DML
+scripts for Oracle 9i database
+                                    <br>
+                                    3. Tuning SQL statements and Hibernate mapping to improve performance, and
+consequently met the SLAs
+                                    <br>
+                                    4. Creation of various database objects like procedures, triggers, functions etc
+                                    <br>
+                                    5. Creating functional and technical documents
+                                    <br>
+                                    6. Built and deploying Java applications into multiple environments
+                                    <br>
+                                    7. End to end support of work.
+                                    <br>
+                                    8. Team Size: 30
+                                  </p>
+                                  <h5>
+                                      Web​ ​Based​ ​Learning​ ​Management​ ​System
+                                  </h5>
+                                  <span class="label label-info"> August 2010 -​ ​July 2011 </span>
+                                  <br>
+                                  <span class="label label-inf"> West​ ​Bengal​ ​University​ ​of​ ​Technology,​ Kolkata </span>
+                                  <p>
+                                    1. Designing and developing a web based learning management system akin to Moodle
+                                    <br>
+                                    2. Research on similar web based learning management systems
+                                    <br>
+                                    3. Technologies - .Net Framework and Microsoft SQL Server
+                                    <br>
+                                    4. Documentation of Work
+                                    <br>
+                                    5. Team Size : 4
+                                  </p>
+                                  </li>
+                              </li>
+                              </ul>
+
+
+
+                            </section>
+                          </div>
+                        </div>
+                      <!-- End Portfolio Data -->
+                          <div id="personal">
+                            <section class="clearfix">
+                            <div class="info">
+                              <br> <br>
+                              <p>
+                            I was born and brought up in Agartala, a small city in the north eastern part of India. I have also lived in Kolkata (India), Paris (France) and Lisbon (Portugal).
+                            <br> <br>
+                            I speak English(Fluent), Bengali(Mother Tongue), Hindi (Fluent) and German (Intermediate).
+                            My hobbies include reading novels and poetry, making music and hiking.
+                             <br> <br>
+                             In my free time, I also work with <a href="https://smilemunich.wordpress.com/pictures-from-performances/">Smile Project</a> as a singer as well as social media and concert coordinator. Smile Project is an international music ensemble which sings for the benefit of groups who are unable to venture out of their environment to find joy; such as: children in hospitals, or people in elderly centers and sheltered centers in the greater Munich area.
+                             </p>
+                           </div>
+                           </section>
+                         </div>
+                    <!-- End Personal Data -->
+
+
+                          <div id="blogs">
+                            <div>
+                              <section class="clearfix">
+                                This is a blog to take notes while I keep on learning different topics.
+                                <br>
+                                <ul class="no-list work">
+                                    <li>
+                                        <h4>
+                                            <br>
+                                            1. Machine Learning
+                                        </h4>
+                                        <p>
+                                          Three types of Machine Learning algorithm:
+                                          <br> <br>
+                                          1. <b> Supervised Learning </b>:  Classification and Regression
+                                          <br>
+                                          2. <b> Unsupervided Learning </b> : Clustering
+                                          <br>
+                                          3.<b> Reinforcement Learning </b>
+                                        </p>
+                                        <h6>
+                                            Supervised Learning
+                                        </h5>
+                                        <p>
+                                        <b> Classification : </b>  Identify what category new information belongs in.
+                                        <br>
+                                        <b> Regression :  </b> Forecast the future estimating relationship between variables.
+                                        <br>
+                                        <img src="5.png" alt="Supervised Classification" width="60%" height="60%">
+                                      </p>
+                                      <h6>
+                                          Unsupervised Learning
+                                      </h5>
+                                      <p>
+                                      <b> Clustering : </b>  Separate similar data points into intuitive groups.
+                                      <br> <br>
+                                      <img src="6.png" alt="Unsupervised Classification" width="25%" height="25%">
+                                    </p>
+                                    <h6>
+                                        Reinforcement Learning
+                                    </h5>
+                                    <p>
+                                    <b> Reinforcement Learning : </b> Reward Based Learning
+                                    <br> <br>
+                                    <img src="7.png" alt="Reinforcement Learning" width="40%" height="40%">
+                                    <img src="8.png" alt="Reinforcement Learning" width="50%" height="50%">
+                                  </p>
+                                    </li>
+                                    <li>
+                                        <h4>
+                                            2. Deep Learning
+                                        </h4>
+                                        <p>
+                                          1. Hierarchical method of learning representations or abstractions of data.
+                                          <br>
+                                          2. Recent upsurge in popularity of neural networks : scale of data and scale of computation.
+                                        </p>
+                                        <br>
+                                        <p>
+                                        <img src="9.png" alt="Deep Learning" width="60%" height="60%">
+                                        <br>
+                                        <img src="10.png" alt="Deep Learning" width="60%" height="60%">
+                                        <br>
+                                        <img src="11.png" alt="Deep Learning" width="60%" height="60%">
+                                        <br>
+                                        <img src="12.png" alt="Deep Learning" width="60%" height="80%">
+                                      </p>
+                                    </li>
+                                    <li>
+                                        <h4>
+                                            3. Convolutional Neural Networks
+                                        </h4>
+                                        <p>
+                                          Regular Neural Networks don’t scale well to full images.
+                                        </p>
+                                        <br>
+                                        <p>
+                                        <img src="13.png" alt="Deep Learning" width="60%" height="60%">
+                                       </p>
+                                       <p>
+                                         1. Convolutional Neural Network take images as input.
+                                         <br>
+                                         2. Three main types of layers to build Convolutional Network architectures: 
+                                         <br>
+                                         Convolutional Layer, Pooling Layer, and Fully-Connected Layer.
+                                         <br>
+                                         3. Layers transform image volume into an output volume through differentiable function.
+                                         <br> <br>
+                                        <img src="14.png" alt="Deep Learning" width="60%" height="60%">
+                                      </p>
+                                    </li>
+                                </ul>
+
+
+
+                              </section>
+                            </div>
+                          </div>
+                        <!-- End Blog Data -->
+
+                </div>
+              <!-- End Resume Tab Data -->
+              <!-- Projects Tab Data -->
+
+
+            </div>
+        </div>
+        <!-- End Tab Container -->
+        <footer>
+            <p>
+                <i>"There are only two ways to live your life. One is as though nothing is a miracle. The other is as though everything is a miracle.”</i> ― Albert Einstein
+            </p>
+        </footer>
+    </div><!-- #main -->
+</div><!-- #main-container -->
+
+
+
+</body>
+</html>

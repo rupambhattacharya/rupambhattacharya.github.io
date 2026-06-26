@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Building a Natural-Language Interface to OpenSearch with Claude Tool Use — Rupam Bhattacharya</title>
+  <meta name="description" content="How I built an agentic system that lets product managers and engineers query a production OpenSearch cluster in plain English — using Claude tool use, AWS Lambda, IAM, and FGAC.">
+  <meta name="author" content="Rupam Bhattacharya">
+
+  <meta property="og:title" content="Building a Natural-Language Interface to OpenSearch with Claude Tool Use">
+  <meta property="og:description" content="How I built an agentic system that lets product managers and engineers query a production OpenSearch cluster in plain English.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://rupambhattacharya.github.io/writing/opensearch-natural-language-interface.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fefefe;
+      --text: #1a1a1a;
+      --subtle: #666;
+      --faint: #999;
+      --accent: #1F4E79;
+      --accent-soft: #f0f4f8;
+      --border: #e8e8e8;
+      --code-bg: #1e1e1e;
+      --code-fg: #d4d4d4;
+      --max-w: 720px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(254, 254, 254, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      z-index: 100;
+    }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    nav .brand {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text);
+      text-decoration: none;
+    }
+    nav .links { display: flex; gap: 20px; flex-wrap: wrap; }
+    nav .links a {
+      color: var(--subtle);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    nav .links a:hover { color: var(--accent); }
+
+    /* Article header */
+    .article-header {
+      padding: 64px 0 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    .back-link {
+      display: inline-block;
+      font-size: 13px;
+      color: var(--subtle);
+      text-decoration: none;
+      margin-bottom: 28px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .back-link:hover { color: var(--accent); }
+    .article-header h1 {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+    .article-meta {
+      font-size: 13px;
+      color: var(--faint);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .article-meta span { margin-right: 20px; }
+
+    /* Body */
+    .article-body {
+      padding: 48px 0 80px;
+    }
+
+    .article-body p {
+      margin-bottom: 20px;
+      color: #2a2a2a;
+    }
+
+    .article-body h2 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin: 56px 0 20px;
+    }
+
+    .article-body h3 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin: 36px 0 12px;
+    }
+
+    .article-body ul, .article-body ol {
+      padding-left: 22px;
+      margin-bottom: 20px;
+      color: #2a2a2a;
+    }
+    .article-body li { margin-bottom: 6px; }
+
+    .article-body a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border 0.15s;
+    }
+    .article-body a:hover { border-bottom-color: var(--accent); }
+
+    /* Callout */
+    .callout {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      padding: 16px 20px;
+      margin: 28px 0;
+      font-size: 15px;
+      color: #2a2a2a;
+    }
+    .callout strong { color: var(--accent); }
+
+    /* Code */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875em;
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: #1a1a1a;
+    }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 22px 24px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+
+    /* Diagram */
+    .diagram {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 28px 24px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--subtle);
+    }
+    tr:last-child td { border-bottom: none; }
+
+    /* Step list */
+    .steps { margin: 24px 0; }
+    .step {
+      display: flex;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-body p { margin-bottom: 6px; }
+    .step-body p:last-child { margin-bottom: 0; }
+    .step-body strong { font-weight: 600; }
+
+    /* Footer */
+    footer {
+      padding: 40px 0 60px;
+      border-top: 1px solid var(--border);
+      color: var(--faint);
+      font-size: 14px;
+      text-align: center;
+    }
+    footer a { color: var(--subtle); text-decoration: none; margin: 0 8px; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .article-header h1 { font-size: 24px; }
+      .article-header { padding: 44px 0 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="brand">Rupam Bhattacharya</a>
+    <div class="links">
+      <a href="/#about">About</a>
+      <a href="/#work">Work</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="article-header">
+    <div class="container">
+      <a href="/#writing" class="back-link">← Writing</a>
+      <h1>Building a Natural-Language Interface to OpenSearch with Claude Tool Use</h1>
+      <div class="article-meta">
+        <span>July 2026</span>
+        <span>14 min read</span>
+        <span>AI · AWS · OpenSearch</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="article-body">
+    <div class="container">
+
+      <p>
+        At ProSieben we run a production OpenSearch cluster that stores ATV (connected-TV) streaming analytics — device sessions, viewing patterns, ad break events, consent logs. The data is rich. The access pattern, until recently, was not: a product manager with a question had to file a Jira ticket, a developer had to translate it into Query DSL, and both parties had to wait for each other. Every ad-hoc question was a small tax on engineering time.
+      </p>
+
+      <p>
+        I wanted to fix that. What I built is an agent that lets anyone on the team type a question in plain English — "how many unique devices were active yesterday, broken down by manufacturer?" — and get an answer in seconds, without touching DSL or asking an engineer. This post explains how I built it, what the architecture looks like, and the specific decisions that made the security model actually hold up.
+      </p>
+
+      <h2>The core problem</h2>
+
+      <h3>Why this is harder than it looks</h3>
+
+      <p>
+        Connecting an LLM to a database sounds simple until you think about it carefully. The LLM doesn't know which indices exist. It doesn't know field names or types. And even once you tell it, it has to generate valid Query DSL — a syntax that's expressive but unforgiving. A wrong field name or a missing aggregation key doesn't just return bad data; it returns a 400 error.
+      </p>
+
+      <p>
+        Claude's tool use solves the knowledge problem elegantly. Instead of trying to stuff the entire schema into a system prompt (it's too large, and it changes), I give Claude three tools and let it discover what it needs at runtime:
+      </p>
+
+      <ul>
+        <li><code>list_indices</code> — discover what indices exist, their document counts and sizes</li>
+        <li><code>get_mapping</code> — fetch field types and structure for a specific index</li>
+        <li><code>search_documents</code> — execute a Query DSL query or aggregation</li>
+      </ul>
+
+      <p>
+        The agent's first move for an unfamiliar question is almost always to call <code>list_indices</code>, then <code>get_mapping</code> on the relevant index, and only then construct a query. This is exactly how an experienced engineer approaches an unfamiliar cluster — and it means the agent is always working from current schema, not a stale snapshot I fed it weeks ago.
+      </p>
+
+      <h2>Architecture</h2>
+
+      <h3>Everything in one Lambda</h3>
+
+      <p>
+        The architecture is deliberately minimal: a single AWS Lambda function behind a Function URL. No API Gateway, no separate frontend hosting, no orchestration service. The Lambda does three things depending on the request:
+      </p>
+
+      <ul>
+        <li><strong>GET request:</strong> serves the web chat UI (HTML/CSS/JS inlined in a TypeScript string)</li>
+        <li><strong>POST request:</strong> runs the tool-calling loop — calls Claude, executes tools against OpenSearch, iterates until Claude has a final answer, returns it</li>
+        <li><strong>Session management:</strong> keeps an in-memory conversation store so follow-up questions work ("filter that to Samsung only")</li>
+      </ul>
+
+      <div class="diagram">Browser (GET) ──────────────────────▶ Lambda (Function URL)
+                                         │
+                                         │ serves inline chat UI
+                                         ▼
+Browser (POST message) ──────────────▶ Lambda
+                                         │
+                                ┌────────┴────────┐
+                                │                 │
+                           Claude API         OpenSearch
+                        (via LLM Gateway)   (SigV4 signed)
+                                │                 │
+                                └────────┬────────┘
+                                         │
+                                    tool loop
+                                  (up to 10 iters)
+                                         │
+                                    final answer
+                                         │
+                                         ▼
+                               Browser ◀──────── JSON response</div>
+
+      <p>
+        The Lambda is Node.js 24.x, 512 MB memory, 600 second timeout. The generous timeout matters: a complex multi-step query — "list indices, fetch mapping, run aggregation, run a follow-up aggregation" — can take 30–45 seconds even on a fast cluster, and most of that is waiting on Claude's API calls.
+      </p>
+
+      <h3>The tool-calling loop</h3>
+
+      <p>
+        The core of the Lambda is a simple loop: call Claude, check if the response contains a <code>tool_use</code> block, execute the tool, append a <code>tool_result</code> to the conversation, call Claude again. Repeat until Claude returns a <code>stop_reason</code> of <code>end_turn</code> with no pending tool calls.
+      </p>
+
+      <pre><code>let messages = [...sessionHistory, { role: 'user', content: userMessage }];
+let iterations = 0;
+
+while (iterations < MAX_TOOL_ITERATIONS) {
+  const response = await claude.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 4096,
+    system: SYSTEM_PROMPT,
+    tools: TOOL_DEFINITIONS,
+    messages,
+  });
+
+  if (response.stop_reason === 'end_turn') {
+    return extractText(response);
+  }
+
+  // Claude wants to call a tool
+  const toolUse = response.content.find(b => b.type === 'tool_use');
+  const toolResult = await executeTool(toolUse.name, toolUse.input);
+
+  messages = [
+    ...messages,
+    { role: 'assistant', content: response.content },
+    { role: 'user', content: [{ type: 'tool_result', tool_use_id: toolUse.id, content: toolResult }] },
+  ];
+
+  iterations++;
+}</code></pre>
+
+      <p>
+        The loop cap of 10 iterations is a practical guardrail. In production, simple questions resolve in 2–3 iterations. Complex multi-step explorations top out at 6–7. I've never seen a legitimate query need more than that.
+      </p>
+
+      <h3>Connecting to OpenSearch: SigV4 and IAM</h3>
+
+      <p>
+        OpenSearch on AWS uses SigV4 request signing — the same signing mechanism as every other AWS API. My Lambda has an IAM execution role, and I use the <code>@opensearch-project/opensearch</code> client with the <code>aws-sdk</code> credentials provider to sign every request automatically:
+      </p>
+
+      <pre><code>import { Client } from '@opensearch-project/opensearch';
+import { AwsSigv4Signer } from '@opensearch-project/opensearch/aws';
+import { defaultProvider } from '@aws-sdk/credential-provider-node';
+
+const client = new Client({
+  ...AwsSigv4Signer({
+    region: 'eu-west-1',
+    service: 'es',
+    getCredentials: defaultProvider(),
+  }),
+  node: process.env.OPENSEARCH_ENDPOINT,
+});</code></pre>
+
+      <p>
+        This means there are no credentials to manage or rotate. The Lambda's IAM role is the credential. When the role changes (on rotation, on Lambda update), the signing just works.
+      </p>
+
+      <h2>Security: defence in depth</h2>
+
+      <h3>Why read-only access is harder to guarantee than it sounds</h3>
+
+      <p>
+        The first time I described this project, someone asked: "couldn't the LLM just decide to delete something?" It's a fair question. The honest answer is: the system prompt alone is not enough. I needed security controls at every layer independently, so that no single failure — a prompt injection, a bug in my loop, a future model version that reasons differently — could result in a write.
+      </p>
+
+      <p>
+        Here's the full stack:
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Control</th><th>What it prevents</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Tool definitions</td>
+            <td>Only <code>search_documents</code>, <code>list_indices</code>, <code>get_mapping</code> exist</td>
+            <td>No code path for write operations; Claude cannot call a tool that doesn't exist</td>
+          </tr>
+          <tr>
+            <td>IAM policy</td>
+            <td><code>es:ESHttpGet</code> and <code>es:ESHttpPost</code> only</td>
+            <td>No <code>ESHttpPut</code>, <code>ESHttpDelete</code>, <code>ESHttpPatch</code> at the AWS level</td>
+          </tr>
+          <tr>
+            <td>FGAC role</td>
+            <td><code>ai_agent_readonly</code> in OpenSearch Security</td>
+            <td>Even with HTTP POST (needed for <code>_search</code>), no write/delete/admin at the index level</td>
+          </tr>
+          <tr>
+            <td>Result cap</td>
+            <td><code>size</code> capped at 100 documents</td>
+            <td>Prevents accidental bulk data exfiltration via large queries</td>
+          </tr>
+          <tr>
+            <td>System prompt</td>
+            <td>Claude instructed it has read-only access</td>
+            <td>First line of defence; not the only one</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <strong>The key insight:</strong> HTTP POST is required for OpenSearch <code>_search</code> — search requests with complex DSL bodies go via POST, not GET. This means IAM-level read-only cannot simply block all POSTs. The FGAC layer exists precisely to enforce read-only semantics at the index level, independently of the HTTP method.
+      </div>
+
+      <h3>Setting up FGAC (Fine-Grained Access Control)</h3>
+
+      <p>
+        FGAC is OpenSearch's internal security layer. It sits below IAM: IAM controls whether the AWS API call reaches OpenSearch at all; FGAC controls what that request is allowed to do once it arrives.
+      </p>
+
+      <p>
+        I created a custom role called <code>ai_agent_readonly</code> and mapped the Lambda's IAM role ARN to it. The role grants exactly what the agent needs and nothing more:
+      </p>
+
+      <pre><code>PUT _plugins/_security/api/roles/ai_agent_readonly
+{
+  "cluster_permissions": ["cluster_composite_ops_ro"],
+  "index_permissions": [{
+    "index_patterns": ["*"],
+    "allowed_actions": [
+      "read",
+      "indices:data/read/*",
+      "indices:admin/mappings/get",
+      "indices:monitor/stats"
+    ]
+  }]
+}</code></pre>
+
+      <pre><code>PUT _plugins/_security/api/rolesmapping/ai_agent_readonly
+{
+  "backend_roles": [
+    "arn:aws:iam::&lt;account-id&gt;:role/atv-data-ai-agent-lambda-role-prod"
+  ]
+}</code></pre>
+
+      <p>
+        The role mapping uses the Lambda's IAM role ARN as a backend role. OpenSearch extracts the role from the SigV4-signed request and applies the FGAC policy. No username, no password, no API key to manage — the IAM identity is the identity.
+      </p>
+
+      <h3>The LLM Gateway and key management</h3>
+
+      <p>
+        We run a company-managed LLM gateway (a LiteLLM proxy) that handles model routing, rate limiting, and audit logging across all teams. Rather than hardcoding an Anthropic API key, I call the gateway with a virtual key stored in SSM Parameter Store as a SecureString:
+      </p>
+
+      <pre><code>const apiKey = await ssm.getParameter({
+  Name: '/atv-data/prod/claude-api-key',
+  WithDecryption: true,
+}).promise();
+
+const claude = new Anthropic({
+  apiKey: apiKey.Parameter.Value,
+  baseURL: process.env.LLM_GATEWAY_URL,
+});</code></pre>
+
+      <p>
+        The Lambda's IAM role has <code>ssm:GetParameter</code> on that specific parameter path — nothing broader. The key is never in source code, environment variables at rest, or logs. The gateway provides an additional layer of rate limiting and visibility into which teams are spending what.
+      </p>
+
+      <h2>The conversation experience</h2>
+
+      <h3>Multi-turn state</h3>
+
+      <p>
+        One of the things that makes this genuinely useful rather than just a novelty is that it remembers the conversation. A PM can ask "show me sessions by manufacturer this week", then "filter to just Samsung", then "what's the trend for Samsung over the last month?" — each question building on the last, without repeating context.
+      </p>
+
+      <p>
+        State is kept in a simple in-memory map keyed by session ID (a UUID generated on first request). The Lambda returns the session ID in the response; subsequent requests include it. There's a 30-minute TTL; if the Lambda cold-starts, sessions are lost, but in practice that's rare during working hours.
+      </p>
+
+      <p>
+        For most use cases this is good enough. The obvious upgrade — if session persistence across cold starts matters — is to move the session store to DynamoDB.
+      </p>
+
+      <h3>What the tool loop looks like in practice</h3>
+
+      <p>
+        Take the question: <em>"How many device sessions happened yesterday?"</em> Here's what actually happens inside the loop:
+      </p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <p><strong>Claude receives the question</strong> along with the system prompt and tool definitions. It decides to call <code>list_indices</code> to discover what's available.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <p><strong>Lambda calls <code>list_indices</code>.</strong> Returns index names, doc counts, and sizes. Claude sees <code>device-data-session-*</code> indices and identifies them as relevant.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <p><strong>Claude calls <code>get_mapping</code></strong> on <code>device-data-session-2026.06.25</code> to confirm which field holds the timestamp. Finds <code>@timestamp</code>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <p><strong>Claude calls <code>search_documents</code></strong> with a <code>range</code> query on <code>@timestamp</code> for yesterday, and a <code>value_count</code> aggregation on a unique session field. Lambda signs and executes the request against OpenSearch.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <p><strong>Claude synthesises the answer:</strong> "There were 1,247,832 device sessions yesterday. This is 3.2% higher than the same day last week." The loop ends.</p>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        The whole exchange takes about 15–25 seconds. Most of that is latency across two round-trips to an external API and one OpenSearch query.
+      </p>
+
+      <h2>What makes this different from a chatbot over docs</h2>
+
+      <p>
+        A lot of "AI + data" demos work by pre-indexing documents and doing RAG. This is different in a few ways that matter for production analytics:
+      </p>
+
+      <p>
+        <strong>It queries live data.</strong> The agent hits the actual OpenSearch cluster on every request. If data was ingested five minutes ago, it's queryable. There's no indexing lag, no stale cache.
+      </p>
+
+      <p>
+        <strong>It uses aggregations, not document retrieval.</strong> The interesting analytics questions aren't "show me document 42" — they're "how many unique devices per day for the last week, broken down by platform?" That's a date_histogram aggregation with a cardinality sub-aggregation. Claude generates valid aggregation DSL and interprets the bucket results correctly.
+      </p>
+
+      <p>
+        <strong>The schema is dynamic.</strong> Index mappings change over time. Tool-based discovery means the agent always works with the current schema, not one I froze into a prompt last month.
+      </p>
+
+      <h2>Things that surprised me</h2>
+
+      <h3>Claude is better at Query DSL than I expected</h3>
+
+      <p>
+        I was prepared to spend time prompt-engineering around DSL mistakes. In practice, Claude's Query DSL is solid. The main failure mode I encountered was on complex nested aggregations where the index mapping had unusual field types. The fix was to always call <code>get_mapping</code> first and include the relevant field types in the tool result — once Claude knows a field is <code>keyword</code> vs <code>text</code>, it makes the right aggregation choice.
+      </p>
+
+      <h3>Error handling is part of the intelligence</h3>
+
+      <p>
+        When an OpenSearch query fails — wrong field name, index not found, query parse error — I return the error as a tool result rather than throwing an exception. Claude reads the error, adjusts, and retries with a corrected query. This self-correction behaviour is one of the most useful properties of tool-based agents. The system degrades gracefully rather than hard-failing.
+      </p>
+
+      <h3>The result size cap matters more than you'd think</h3>
+
+      <p>
+        Without a hard size cap, I noticed Claude would sometimes request 1,000 or 10,000 documents on exploratory queries. Pulling that into the context is slow, expensive, and rarely useful — aggregations answer the real question much better. Enforcing <code>MAX_SIZE=100</code> server-side (not just in the prompt) forces aggregation-first behaviour and keeps response times sensible.
+      </p>
+
+      <h2>What's next</h2>
+
+      <p>
+        The agent is deployed and in daily use by product and engineering. A few directions I'm thinking about:
+      </p>
+
+      <ul>
+        <li><strong>Scheduled reports via EventBridge.</strong> Trigger the Lambda daily with a prompt like "summarise yesterday's KPIs" and post results to a Teams channel. The backend is already the right shape for this.</li>
+        <li><strong>Anomaly alerting.</strong> A periodic check: "are any indices showing document counts more than 2 standard deviations below their 7-day average?" The agent can do the math; I just need to hook it up to a notification channel.</li>
+        <li><strong>Multi-source tools.</strong> Adding CloudWatch metrics alongside OpenSearch would let Claude correlate Lambda errors with ingestion gaps — the kind of debugging question that currently requires jumping between dashboards.</li>
+      </ul>
+
+      <p>
+        The core pattern — give an LLM a small set of well-defined tools, enforce security at every layer independently, keep the infrastructure minimal — scales beyond OpenSearch. I'm using a similar approach for the GenAI developer CLI we run internally, and the same principles hold.
+      </p>
+
+      <div class="callout">
+        If you're working on something similar or have questions about the implementation, I'm reachable at <a href="mailto:rupam.speaks@gmail.com">rupam.speaks@gmail.com</a> or on <a href="https://www.linkedin.com/in/rupam-bhattacharya-29884714/" target="_blank" rel="noopener">LinkedIn</a>.
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    &copy; 2026 Rupam Bhattacharya &middot; Munich, Germany
+  </div>
+</footer>
+
+</body>
+</html>

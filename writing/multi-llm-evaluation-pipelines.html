@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multi-LLM Evaluation Pipelines: Treating Prompts as Deployable Artefacts — Rupam Bhattacharya</title>
+  <meta name="description" content="Why prompts and skills need version control, review, and evaluation gates just like code — and how I built a config-driven, multi-provider CLI around that idea.">
+  <meta name="author" content="Rupam Bhattacharya">
+
+  <meta property="og:title" content="Multi-LLM Evaluation Pipelines: Treating Prompts as Deployable Artefacts">
+  <meta property="og:description" content="Why prompts and skills need version control, review, and evaluation gates just like code.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://rupambhattacharya.github.io/writing/multi-llm-evaluation-pipelines.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fefefe;
+      --text: #1a1a1a;
+      --subtle: #666;
+      --faint: #999;
+      --accent: #1F4E79;
+      --accent-soft: #f0f4f8;
+      --border: #e8e8e8;
+      --code-bg: #1e1e1e;
+      --code-fg: #d4d4d4;
+      --max-w: 720px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(254, 254, 254, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      z-index: 100;
+    }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    nav .brand {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text);
+      text-decoration: none;
+    }
+    nav .links { display: flex; gap: 20px; flex-wrap: wrap; }
+    nav .links a {
+      color: var(--subtle);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    nav .links a:hover { color: var(--accent); }
+
+    /* Article header */
+    .article-header {
+      padding: 64px 0 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    .back-link {
+      display: inline-block;
+      font-size: 13px;
+      color: var(--subtle);
+      text-decoration: none;
+      margin-bottom: 28px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .back-link:hover { color: var(--accent); }
+    .article-header h1 {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+    .article-meta {
+      font-size: 13px;
+      color: var(--faint);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .article-meta span { margin-right: 20px; }
+
+    /* Body */
+    .article-body {
+      padding: 48px 0 80px;
+    }
+
+    .article-body p {
+      margin-bottom: 20px;
+      color: #2a2a2a;
+    }
+
+    .article-body h2 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin: 56px 0 20px;
+    }
+
+    .article-body h3 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin: 36px 0 12px;
+    }
+
+    .article-body ul, .article-body ol {
+      padding-left: 22px;
+      margin-bottom: 20px;
+      color: #2a2a2a;
+    }
+    .article-body li { margin-bottom: 6px; }
+
+    .article-body a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border 0.15s;
+    }
+    .article-body a:hover { border-bottom-color: var(--accent); }
+
+    /* Callout */
+    .callout {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      padding: 16px 20px;
+      margin: 28px 0;
+      font-size: 15px;
+      color: #2a2a2a;
+    }
+    .callout strong { color: var(--accent); }
+
+    /* Code */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875em;
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: #1a1a1a;
+    }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 22px 24px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+
+    /* Diagram */
+    .diagram {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 28px 24px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--subtle);
+    }
+    tr:last-child td { border-bottom: none; }
+
+    /* Step list */
+    .steps { margin: 24px 0; }
+    .step {
+      display: flex;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-body p { margin-bottom: 6px; }
+    .step-body p:last-child { margin-bottom: 0; }
+    .step-body strong { font-weight: 600; }
+
+    /* Footer */
+    footer {
+      padding: 40px 0 60px;
+      border-top: 1px solid var(--border);
+      color: var(--faint);
+      font-size: 14px;
+      text-align: center;
+    }
+    footer a { color: var(--subtle); text-decoration: none; margin: 0 8px; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .article-header h1 { font-size: 24px; }
+      .article-header { padding: 44px 0 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="brand">Rupam Bhattacharya</a>
+    <div class="links">
+      <a href="/#about">About</a>
+      <a href="/#work">Work</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#blog">Blog</a>
+      <a href="/#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="article-header">
+    <div class="container">
+      <a href="/#blog" class="back-link">← Blog</a>
+      <h1>Multi-LLM Evaluation Pipelines: Treating Prompts as Deployable Artefacts</h1>
+      <div class="article-meta">
+        <span>July 2026</span>
+        <span>11 min read</span>
+        <span>AI · LLMOps · Evaluation</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="article-body">
+    <div class="container">
+
+      <p>
+        Most teams that build with LLMs treat prompts as an implementation detail — a string interpolated into an API call, tweaked in place, redeployed with the rest of the code. That works until you have more than one prompt, more than one model provider, and more than one person editing them. At that point a prompt is no longer a string. It's an artefact with a version, a behavioural contract, and a blast radius if it regresses. It deserves the same discipline as any other deployable: review, versioning, and a test suite that runs before it ships.
+      </p>
+
+      <p>
+        This is the problem I've been chipping away at in <a href="https://github.com/rupambhattacharya/llm-collab" target="_blank" rel="noopener">llm-collab</a>, an open-source CLI I built for orchestrating coding agents across providers. It started as "a tool to launch Claude Code with the right MCP servers attached" and turned into something closer to an LLMOps platform in miniature: config-driven model selection, cost and audit instrumentation on every inference, and — the part this post is about — prompts (I call them <em>skills</em>) shipped as versioned files with an evaluation gate in front of promotion, not behind it.
+      </p>
+
+      <h2>The core problem</h2>
+
+      <h3>A prompt is not portable by default</h3>
+
+      <p>
+        The moment you support more than one model provider — llm-collab talks to Anthropic, OpenAI, Ollama, and OpenRouter through the Vercel AI SDK — a prompt that was tuned against one model's instruction-following quietly degrades against another. Claude and GPT-family models don't weight system-prompt structure, tool-use hints, or formatting instructions identically. A prompt that reliably produces a clean JSON tool call on one model might wrap it in prose on another. You don't find this out by reading the prompt. You find it by running it.
+      </p>
+
+      <p>
+        The second complication is cost. If a prompt works equally well on a $0.80/M-token model and a $15/M-token model, shipping it against the expensive one by default is a standing tax with no upside. Evaluation has to report quality <em>and</em> cost <em>and</em> latency together, per candidate model, or "which model should this prompt run on" turns into a guess.
+      </p>
+
+      <h2>Skills as deployable artefacts</h2>
+
+      <h3>Markdown files, not string literals</h3>
+
+      <p>
+        The first design decision was to stop embedding prompts inside command handlers. Every prompt in llm-collab — what I call a <em>skill</em> — is a standalone Markdown file with YAML frontmatter declaring its dependencies explicitly: which model it targets, which tools it's allowed to call, and what has to be true in the environment before it can run.
+      </p>
+
+      <pre><code>---
+userInvocable: true
+allowedTools:
+  - github_get_pr
+  - github_list_prs
+  - github_add_comment
+  - file_read
+  - file_list
+  - file_search
+  - shell_execute
+model: claude-sonnet-5
+readinessCheck: "gh auth status"
+requiredEnvVars:
+  - name: GITHUB_TOKEN
+    description: GitHub personal access token
+    required: true
+---
+
+# Code Review
+
+Review code changes for quality, correctness, and best practices.
+...</code></pre>
+
+      <p>
+        Treating a skill as a file rather than a string buys three things immediately. It's diffable — a prompt change shows up in <code>git diff</code> like any other change and goes through the same PR review. It's installable and idempotent — <code>llm-collab skills install</code> writes it to <code>~/.claude/skills/</code> without clobbering a user's local edits, the same install/upgrade discipline you'd expect from a package manager. And it's <strong>rollbackable</strong> for free: reverting a bad prompt is <code>git revert</code>, not a hotfix to application code.
+      </p>
+
+      <div class="callout">
+        <strong>The reframe that matters:</strong> once a prompt is a file with a declared model and declared tool surface, "does this prompt still work" becomes a question you can automate an answer to — the same way "does this function still work" became automatable once you had a test file next to the source file.
+      </div>
+
+      <h3>Model selection is config, not code</h3>
+
+      <p>
+        The second piece is that llm-collab never hardcodes which model handles a task. Model choice is resolved through the same precedence chain as everything else in the CLI — <strong>CLI flag &gt; environment variable &gt; config file &gt; default</strong> — and tasks are routed by declared complexity rather than a single fixed model:
+      </p>
+
+      <pre><code>{
+  "ai": {
+    "default_provider": "anthropic",
+    "default_model": "claude-sonnet-5",
+    "complexity_routing": {
+      "low": "claude-haiku-4-5",
+      "medium": "claude-sonnet-5",
+      "high": "claude-opus-4-8"
+    }
+  }
+}</code></pre>
+
+      <p>
+        This matters for evaluation because it turns "which model should run this prompt" from a hardcoded assumption into a variable you can sweep. The evaluation harness doesn't test one prompt against one model — it tests a prompt against every model in the routing table it's eligible for, and the routing thresholds themselves get set from what the results show, not from intuition.
+      </p>
+
+      <h2>Instrumenting every inference</h2>
+
+      <h3>Cost and audit as evaluation signal</h3>
+
+      <p>
+        Every model call in llm-collab goes through a cost tracker and an audit logger, independent of whether you're in an interactive session or a scripted evaluation run. The cost tracker records input/output tokens against a static pricing table and writes a JSONL record per call:
+      </p>
+
+      <pre><code>record(model: string, provider: string, inputTokens: number, outputTokens: number, command?: string): UsageRecord {
+  const costUsd = getModelCost(model, inputTokens, outputTokens);
+  const record: UsageRecord = {
+    timestamp: new Date().toISOString(),
+    sessionId: this.sessionId,
+    model,
+    provider,
+    inputTokens,
+    outputTokens,
+    costUsd,
+    command,
+  };
+  // append to ~/.llm-collab/costs/sessions.jsonl
+  ...
+}</code></pre>
+
+      <p>
+        The audit logger records the shape of the interaction — every <code>tool_call</code>, every <code>decision</code>, every <code>error</code> — as a typed, timestamped JSONL event, with an explicit event taxonomy rather than free-text logs:
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>Event</th><th>Fires on</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>command_start</code> / <code>command_end</code></td><td>Every CLI invocation</td></tr>
+          <tr><td><code>tool_call</code></td><td>Any MCP tool execution, success or failure</td></tr>
+          <tr><td><code>decision</code></td><td>Points where the agent chose between options</td></tr>
+          <tr><td><code>config_change</code> / <code>config_read</code></td><td>Configuration mutation or access</td></tr>
+          <tr><td><code>error</code></td><td>Any caught failure, with a redacted detail string</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        Neither of these was built for evaluation originally — they exist so a user can answer "what did this session cost me" and "what did the agent actually do." But once every inference already carries model, tokens, cost, and outcome, that log <em>is</em> the raw material an evaluation pipeline needs. I didn't have to add instrumentation to get evaluation data; I had to stop throwing away instrumentation I already had.
+      </p>
+
+      <h2>The evaluation gate</h2>
+
+      <h3>What "passing" needs to mean</h3>
+
+      <p>
+        The piece I'm building now — the honest "not finished yet" part of this post — is the harness that turns that raw instrumentation into a promote/reject decision, which I'm calling the arena: a benchmarking run that scores a candidate skill across every model it's routed to before it's allowed to replace the version currently installed. Two evaluation modes, because "good prompt" means something different depending on what the skill produces:
+      </p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <p><strong>Skills arena — LLM-as-judge.</strong> For skills that produce open-ended output (a code review, a knowledge-capture summary), a fixed judge model scores candidate output against a rubric, blind to which model or prompt version produced it. This is the same pattern as the <code>chronicle ask</code> RAG path already in the CLI — semantic retrieval feeding a scored, cited answer — repurposed as a scoring function instead of a user-facing answer.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <p><strong>Agents arena — scenario-based.</strong> For skills that call tools (the <code>github-expert</code> and <code>linear-expert</code> domain agents, for instance), correctness isn't a judge's opinion — it's whether the right tool got called with the right arguments and the task actually completed. These run against fixed, replayable scenarios with assertions on the resulting tool-call trace, not the prose.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <p><strong>Cost and latency ride along.</strong> Every arena run reuses the existing cost tracker, so a scorecard isn't just "pass/fail" — it's quality delta against the current version, per model, with cost and p95 latency attached. A prompt that scores marginally higher but doubles cost on every eligible model is a decision, not an auto-promote.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>Release and rollback, for free</h3>
+
+      <p>
+        Because skills are files under version control rather than state baked into a binary, "release" is a merged PR and "rollback" is a revert — the arena's job is only to gate what gets merged, not to manage a separate deployment artefact. That's the part of "deployable artefact" I care about most: I don't want a bespoke release process for prompts that doesn't already exist for code. I want prompts inside the one that does.
+      </p>
+
+      <h2>What I've learned so far</h2>
+
+      <h3>Portability is the wrong first question</h3>
+
+      <p>
+        I originally set out to write "provider-agnostic" prompts — phrasing that would work identically everywhere. That's the wrong target. Some prompts are worth specializing per provider if the eval data says so; the goal isn't one prompt that's mediocre everywhere, it's a routing table that sends each task to the model/prompt pairing that actually won the comparison.
+      </p>
+
+      <h3>Instrumentation you build for one reason pays for another</h3>
+
+      <p>
+        The cost tracker and audit logger were built so users could answer "what did this cost me" — a pure observability feature. They turned out to be exactly the data model an evaluation pipeline needs, with zero extra instrumentation. If you're building any kind of agent tooling, log inference input/output token counts and outcomes from day one, even before you know you'll need an eval harness. You will.
+      </p>
+
+      <h3>The judge needs its own eval</h3>
+
+      <p>
+        The failure mode I'm most wary of with the skills arena is a judge model that's inconsistent between runs. Before I trust it as a merge gate, the judge itself needs a small labeled set — cases where I already know the right answer — that it has to score consistently before its verdict on anything else counts.
+      </p>
+
+      <h2>What's next</h2>
+
+      <ul>
+        <li><strong>Wire the arena into CI.</strong> A skill change opens a PR; the arena runs automatically against every model in that skill's routing table and posts a scorecard as a comment, the same shape as a test-coverage bot.</li>
+        <li><strong>Judge calibration set.</strong> A small, versioned set of graded examples the judge model has to reproduce before its scores on new candidates are trusted.</li>
+        <li><strong>Cost-aware routing suggestions.</strong> Once enough arena runs accumulate, have the CLI suggest routing-table changes — "this task tier is overpaying for quality it isn't using" — instead of leaving that judgment entirely manual.</li>
+      </ul>
+
+      <p>
+        None of this is exotic. It's the same discipline software engineering already applies to code — version control, review, a test suite that has to pass before merge — pointed at an artefact type we've been treating as disposable. The interesting part isn't the individual pieces; it's that once a prompt is a file with a declared model and a declared tool surface, all of those practices just apply, without inventing new tooling for them.
+      </p>
+
+      <div class="callout">
+        If you're building something similar or want to compare notes on evaluation harnesses, I'm reachable at <a href="mailto:rupam.speaks@gmail.com">rupam.speaks@gmail.com</a> or on <a href="https://www.linkedin.com/in/rupam-bhattacharya-29884714/" target="_blank" rel="noopener">LinkedIn</a>.
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    &copy; 2026 Rupam Bhattacharya &middot; Munich, Germany
+  </div>
+</footer>
+
+</body>
+</html>

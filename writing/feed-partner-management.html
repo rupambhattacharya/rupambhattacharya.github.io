@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Automating Content Ingestion From 200+ Partners — Rupam Bhattacharya</title>
-  <meta name="description" content="Refactoring a legacy Java publishing integration into a config-driven Node.js/TypeScript service: feed management and partner management for 200+ German content partners, deciding draft vs. auto-publish per feed.">
+  <meta name="description" content="System design for a content ingestion foundation generating 5,000 articles a day from 200 German publishers: parsing text and media correctly from heterogeneous partner feeds, and deciding draft vs. auto-publish per feed, not per deploy.">
   <meta name="author" content="Rupam Bhattacharya">
 
   <meta property="og:title" content="Automating Content Ingestion From 200+ Partners">
-  <meta property="og:description" content="Feed management, partner management, and a draft-vs-auto-publish switch that lives in config, not code — ingesting XML/JSON from 200+ German content partners.">
+  <meta property="og:description" content="5,000 articles a day from 200 German publishers: parsing text and media correctly from heterogeneous partner feeds, and a draft-vs-auto-publish decision that lives in config, not code.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://rupambhattacharya.github.io/writing/feed-partner-management.html">
 
@@ -61,7 +61,7 @@
     pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
     .diagram { background: var(--code-bg); color: var(--code-fg); padding: 24px; border-radius: 6px; overflow-x: auto; margin: 24px 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; white-space: pre; }
     .figure { background: var(--code-bg); border-radius: 6px; overflow-x: auto; margin: 24px 0; padding: 20px; }
-    .figure svg { display: block; margin: 0 auto; width: 100%; height: auto; min-width: 560px; }
+    .figure svg { display: block; margin: 0 auto; width: 100%; height: auto; min-width: 600px; }
     .figure-caption { text-align: center; font-size: 12px; color: var(--faint); font-family: 'JetBrains Mono', monospace; margin-top: 10px; }
     table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; }
     th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
@@ -95,8 +95,8 @@
       <h1>Automating Content Ingestion From 200+ Partners</h1>
       <div class="article-meta">
         <span>April 2026</span>
-        <span>9 min read</span>
-        <span>Architecture · Content Systems</span>
+        <span>10 min read</span>
+        <span>System Design · Content Systems</span>
       </div>
     </div>
   </div>
@@ -105,27 +105,70 @@
     <div class="container">
 
       <p>
-        Before this system existed, bringing in a new content partner &mdash; a wire service, a press agency, a niche publisher &mdash; meant a developer writing new integration code against a legacy Java application. That doesn't scale to 200+ partners across Germany, including major sources like Deutsche Welle, AFP, and Presse Portal, each with their own feed format and their own level of trust. I refactored that app into a config-driven Node.js/TypeScript service where onboarding a new partner is a document you create, not a deploy.
+        This system has two jobs that are easy to conflate and expensive to conflate badly. The first is being a <strong>foundation</strong>: a generic, schema-driven content API every editor and every other content-touching workflow builds against, so nobody outside this system re-implements "what an article is" for their own purposes. The second is being an <strong>ingestion pipeline</strong>: automating the intake of XML and JSON feeds from 200+ German content partners &mdash; Deutsche Welle, AFP, Presse Portal among them &mdash; correctly capturing not just text but the images and video references bundled with it, and deciding per feed whether that content is trusted enough to publish itself. At full run rate that pipeline generates around 5,000 articles a day. The legacy Java application this replaced only really did the second job, and did it as one-off code per partner. Splitting the two cleanly is what let it scale to both.
       </p>
 
-      <h2>Two entities carry the whole system</h2>
+      <h2>Two jobs, one foundation</h2>
+
+      <div class="figure">
+        <svg viewBox="0 0 780 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: partner feeds and editors and other workflows all go through one generic content API into MongoDB">
+          <defs>
+            <marker id="arrowT" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#5B9BD5"/>
+            </marker>
+          </defs>
+          <g font-family="JetBrains Mono, monospace" font-size="12" fill="#d4d4d4">
+            <rect x="10" y="20" width="200" height="55" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="110" y="42" text-anchor="middle" font-weight="700">Ingestion pipeline</text>
+            <text x="110" y="58" text-anchor="middle" fill="#999" font-size="10">200+ partner feeds</text>
+
+            <rect x="10" y="150" width="200" height="55" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="110" y="172" text-anchor="middle" font-weight="700">Editors</text>
+            <text x="110" y="188" text-anchor="middle" fill="#999" font-size="10">CMS, manual authoring</text>
+
+            <rect x="580" y="150" width="190" height="55" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="675" y="172" text-anchor="middle" font-weight="700">Other workflows</text>
+            <text x="675" y="188" text-anchor="middle" fill="#999" font-size="10">their own integrations</text>
+
+            <rect x="270" y="85" width="240" height="55" rx="8" fill="#1F4E79" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="390" y="107" text-anchor="middle" font-weight="700" fill="#fff">Generic content API</text>
+            <text x="390" y="123" text-anchor="middle" fill="#cfe0f0" font-size="10">one schema, one contract</text>
+
+            <path d="M210,55 L270,100" fill="none" stroke="#5B9BD5" stroke-width="1.5" marker-end="url(#arrowT)"/>
+            <path d="M210,175 L270,130" fill="none" stroke="#5B9BD5" stroke-width="1.5" marker-end="url(#arrowT)"/>
+            <path d="M580,175 L510,130" fill="none" stroke="#5B9BD5" stroke-width="1.5" marker-end="url(#arrowT)"/>
+          </g>
+        </svg>
+        <div class="figure-caption">the pipeline is the biggest consumer of the foundation, not a separate system from it</div>
+      </div>
+
+      <p>
+        Because ingestion is just another client of the same generic API &mdash; the same content, feed, and partner schemas, the same list/get/post/validate contract every other consumer gets &mdash; a partner-sourced article and an editor-written one are indistinguishable to anything downstream. That's deliberate: nothing downstream should need to know or care whether a given article arrived by RSS or by hand.
+      </p>
+
+      <h2>Getting content in correctly means more than parsing text</h2>
+
+      <p>
+        A feed parser that only extracts headline and body text is an incomplete parser &mdash; most partner feeds carry an image, sometimes a caption, sometimes credit information, spread across several possible tag conventions depending on the partner's RSS dialect. The parser has to check each in order before giving up:
+      </p>
 
       <table>
-        <thead><tr><th>Entity</th><th>Key fields</th></tr></thead>
+        <thead><tr><th>What's needed</th><th>Where it's looked for, in order</th></tr></thead>
         <tbody>
-          <tr><td><strong>Partner</strong></td><td>Contract terms, revenue share, a Salesforce-linked ID, and an <code>isPartner</code> flag that pre-filters who's even eligible for import</td></tr>
-          <tr><td><strong>Feed</strong></td><td>Source URL, format (XML/JSON), a cron schedule, field-mapping rules, and the mode that decides what happens to whatever it imports</td></tr>
+          <tr><td>Image source</td><td><code>media:content</code> URL &rarr; RSS <code>&lt;enclosure&gt;</code> &rarr; a bare <code>&lt;image&gt;</code> tag</td></tr>
+          <tr><td>Image credit</td><td><code>media:credit</code> inside the media block &rarr; a top-level <code>media:credit</code> &rarr; a partner-specific <code>field_credit</code></td></tr>
+          <tr><td>Fallback image</td><td>If none of the above resolve, the first image URL matched directly out of the raw content body</td></tr>
         </tbody>
       </table>
 
       <p>
-        Partner records aren't hand-maintained either &mdash; a scheduled job syncs contract and billing data from Salesforce on its own cycle, so the CRM stays the source of truth for anything commercial, and engineering only owns the feed configuration layer on top of it.
+        Each result becomes a structured image block in the canonical schema &mdash; not raw markup, a typed object with a source URL, credit, and caption. That's what makes the next step possible: this pipeline resolves <em>references</em> to media. It doesn't own image storage, and it shouldn't &mdash; a separate module in the platform's rendering side downloads from that source URL, stores the file once, and serves every transformation of it from the edge. Ingestion's job ends at "here is a well-formed reference to an image with the right credit attached," which is exactly the boundary a system design review should draw: don't make the ingestion pipeline responsible for a problem (image storage, resizing, CDN delivery) that belongs to a different part of the system.
       </p>
 
       <h2>Draft or auto-publish is a config value, not a code path</h2>
 
       <p>
-        This is the decision that matters most: a new, unproven partner's feed is set to create content as drafts, so an editor reviews before anything goes live. A trusted, long-running wire service can be configured to publish straight through. Both are the same pipeline &mdash; the only difference is one field on the feed document.
+        A new, unproven partner's feed is set to create drafts, so an editor reviews before anything goes live. A trusted, long-running wire service can be configured to publish straight through. Both run through the identical pipeline &mdash; the only difference is one field on the feed document.
       </p>
 
       <div class="figure">
@@ -141,7 +184,7 @@
             <text x="95" y="63" text-anchor="middle" fill="#999" font-size="11">XML / JSON, on a cron</text>
 
             <rect x="220" y="20" width="170" height="60" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
-            <text x="305" y="46" text-anchor="middle" font-weight="700">Parse + map</text>
+            <text x="305" y="46" text-anchor="middle" font-weight="700">Parse text + media</text>
             <text x="305" y="63" text-anchor="middle" fill="#999" font-size="11">per-feed field mapping</text>
 
             <rect x="430" y="20" width="170" height="60" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
@@ -170,12 +213,6 @@
         <div class="figure-caption">same pipeline, one config field decides the outcome</div>
       </div>
 
-      <h2>A quality gate before anything reaches an editor</h2>
-
-      <p>
-        Parsing doesn't just extract fields &mdash; it validates them against publishing rules before content is saved at all, catching problems an editor shouldn't have to:
-      </p>
-
       <pre><code>if (teaserType === 'image' && mainImage) {
   if (!mainImage.caption) errors.push('Teaser image must have a caption');
   if (!mainImage.credits) errors.push('Teaser image must have credit');
@@ -184,26 +221,38 @@
 // inline images without credits are stripped, not just flagged
 content = content.filter(p => p.type !== 'IMAGE' || !!p.credits);</code></pre>
 
+      <h2>Two entities carry the trust model</h2>
+
+      <table>
+        <thead><tr><th>Entity</th><th>Key fields</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Partner</strong></td><td>Contract terms, revenue share, a Salesforce-linked ID, and an <code>isPartner</code> flag that pre-filters who's even eligible for import</td></tr>
+          <tr><td><strong>Feed</strong></td><td>Source URL, format, a cron schedule, field-mapping rules, and the mode that decides draft vs. auto-publish</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        Partner records sync from Salesforce on their own schedule rather than being hand-maintained, so the CRM stays the system of record for anything commercial, and this system only owns the feed-configuration layer sitting on top of it.
+      </p>
+
       <h2>Scheduling, cleanup, and knowing when a partner goes quiet</h2>
 
       <table>
         <thead><tr><th>Scheduled job</th><th>What it does</th></tr></thead>
         <tbody>
-          <tr><td>Periodic content fetch</td><td>Pulls every feed due on its own cron, batches the import, and logs invalid feed IDs and failed imports by name</td></tr>
-          <tr><td>Content cleanup</td><td>Auto-unpublishes content after a per-feed retention window, so nothing has to be manually expired</td></tr>
-          <tr><td>Partner sync</td><td>Pulls contract and billing data from Salesforce on a schedule, keeping partner records current without manual entry</td></tr>
+          <tr><td>Periodic content fetch</td><td>Pulls every feed due on its own cron, batches the import, logs invalid feed IDs and failed imports by name</td></tr>
+          <tr><td>Content cleanup</td><td>Auto-unpublishes content after a per-feed retention window</td></tr>
+          <tr><td>Partner sync</td><td>Pulls contract and billing data from Salesforce on a schedule</td></tr>
         </tbody>
       </table>
 
       <p>
-        Two email hooks close the loop operationally: one fires when a partner's feed goes quiet for days &mdash; often the first sign something broke upstream &mdash; and one fires when new content actually lands, so the team isn't watching a dashboard to know the pipeline is alive.
+        Two email hooks close the loop: one fires when a partner's feed goes quiet for days, usually the first sign something broke upstream; one fires when new content lands, so nobody has to watch a dashboard to know the pipeline is alive.
       </p>
 
-      <h2>What the refactor actually bought</h2>
-
-      <p>
-        The old Java app's failure mode was that every new partner was a code change. The rewrite's whole point was to make that a config change instead &mdash; a new partner is a feed document with a mapping and a trust level, not a deploy. That's the same instinct behind every schema-driven system I've built: push variation into data the platform already knows how to read, instead of into code paths that have to be maintained by hand.
-      </p>
+      <div class="callout">
+        <strong>The system-design takeaway:</strong> treat the ingestion pipeline as a client of the foundation, not a special case bolted onto it. Once a partner-sourced article and an editor-written one share one schema, one API contract, and one validation gate, nothing downstream ever has to know the difference &mdash; and "getting content in properly" stops meaning just text, because the schema already has a typed place for the image that came with it. At 5,000 articles a day from 200 publishers, that difference is the whole reliability story.
+      </div>
 
       <div class="callout">
         If you're modernizing a legacy integration layer that's turned into a bottleneck for onboarding new partners, I'm reachable at <a href="mailto:rupam.speaks@gmail.com">rupam.speaks@gmail.com</a> or on <a href="https://www.linkedin.com/in/rupam-bhattacharya-29884714/" target="_blank" rel="noopener">LinkedIn</a>.

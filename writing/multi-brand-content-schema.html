@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>One Schema, Three Brands: Designing a Common Content Model — Rupam Bhattacharya</title>
-  <meta name="description" content="Inside the self-service multi-brand publishing platform: auditing what FOCUS Online, CHIP, and Bunte actually shared, turning that into one schema, and a widget system six teams could extend without a platform-team ticket.">
+  <meta name="description" content="A system-design walkthrough of the self-service multi-brand publishing platform: how schema, a widget framework, editor and rendering frontends, MongoDB Atlas, a load-balanced service mesh, and Akamai image delivery fit together as one system.">
   <meta name="author" content="Rupam Bhattacharya">
 
   <meta property="og:title" content="One Schema, Three Brands: Designing a Common Content Model">
-  <meta property="og:description" content="One schema, a five-package widget system, and a monitoring stack shared across service groups — the self-service platform behind three publishing brands.">
+  <meta property="og:description" content="System design for a self-service multi-brand publishing platform: schema, widget framework, editor/renderer frontends, MongoDB Atlas, load balancers, and Akamai image delivery as one system.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://rupambhattacharya.github.io/writing/multi-brand-content-schema.html">
 
@@ -18,131 +18,59 @@
 
   <style>
     :root {
-      --bg: #fefefe;
-      --text: #1a1a1a;
-      --subtle: #666;
-      --faint: #999;
-      --accent: #1F4E79;
-      --accent-soft: #f0f4f8;
-      --border: #e8e8e8;
-      --code-bg: #1e1e1e;
-      --code-fg: #d4d4d4;
-      --max-w: 720px;
+      --bg: #fefefe; --text: #1a1a1a; --subtle: #666; --faint: #999;
+      --accent: #1F4E79; --accent-soft: #f0f4f8; --border: #e8e8e8;
+      --code-bg: #1e1e1e; --code-fg: #d4d4d4; --max-w: 720px;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      color: var(--text);
-      background: var(--bg);
+      font-size: 16px; line-height: 1.7; color: var(--text); background: var(--bg);
       -webkit-font-smoothing: antialiased;
     }
-
     .container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
-
     nav {
-      position: sticky;
-      top: 0;
-      background: rgba(254, 254, 254, 0.92);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 0;
-      z-index: 100;
+      position: sticky; top: 0; background: rgba(254, 254, 254, 0.92);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border); padding: 14px 0; z-index: 100;
     }
     nav .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
     nav .brand { font-weight: 600; font-size: 15px; color: var(--text); text-decoration: none; }
     nav .links { display: flex; gap: 20px; flex-wrap: wrap; }
     nav .links a { color: var(--subtle); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.15s; }
     nav .links a:hover { color: var(--accent); }
-
     .article-header { padding: 64px 0 48px; border-bottom: 1px solid var(--border); }
-    .back-link {
-      display: inline-block;
-      font-size: 13px;
-      color: var(--subtle);
-      text-decoration: none;
-      margin-bottom: 28px;
-      font-family: 'JetBrains Mono', monospace;
-    }
+    .back-link { display: inline-block; font-size: 13px; color: var(--subtle); text-decoration: none; margin-bottom: 28px; font-family: 'JetBrains Mono', monospace; }
     .back-link:hover { color: var(--accent); }
     .article-header h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; margin-bottom: 16px; }
     .article-meta { font-size: 13px; color: var(--faint); font-family: 'JetBrains Mono', monospace; }
     .article-meta span { margin-right: 20px; }
-
     .article-body { padding: 48px 0 80px; }
     .article-body p { margin-bottom: 20px; color: #2a2a2a; }
-    .article-body h2 {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-      margin: 56px 0 20px;
-    }
+    .article-body h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin: 56px 0 20px; }
     .article-body h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; margin: 36px 0 12px; }
     .article-body ul, .article-body ol { padding-left: 22px; margin-bottom: 20px; color: #2a2a2a; }
     .article-body li { margin-bottom: 6px; }
     .article-body a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border 0.15s; }
     .article-body a:hover { border-bottom-color: var(--accent); }
-
-    .callout {
-      background: var(--accent-soft);
-      border-left: 3px solid var(--accent);
-      padding: 16px 20px;
-      margin: 28px 0;
-      font-size: 15px;
-      color: #2a2a2a;
-    }
+    .callout { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 16px 20px; margin: 28px 0; font-size: 15px; color: #2a2a2a; }
     .callout strong { color: var(--accent); }
-
     code { font-family: 'JetBrains Mono', monospace; font-size: 0.875em; background: #f3f4f6; padding: 2px 6px; border-radius: 3px; color: #1a1a1a; }
-    pre {
-      background: var(--code-bg);
-      color: var(--code-fg);
-      padding: 22px 24px;
-      border-radius: 6px;
-      overflow-x: auto;
-      margin: 24px 0;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      line-height: 1.6;
-    }
+    pre { background: var(--code-bg); color: var(--code-fg); padding: 22px 24px; border-radius: 6px; overflow-x: auto; margin: 24px 0; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; }
     pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
-
-    .diagram {
-      background: var(--code-bg);
-      color: var(--code-fg);
-      padding: 24px;
-      border-radius: 6px;
-      overflow-x: auto;
-      margin: 24px 0;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      line-height: 1.6;
-      white-space: pre;
-    }
+    .diagram { background: var(--code-bg); color: var(--code-fg); padding: 24px; border-radius: 6px; overflow-x: auto; margin: 24px 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; white-space: pre; }
     .figure { background: var(--code-bg); border-radius: 6px; overflow-x: auto; margin: 24px 0; padding: 20px; }
-    .figure svg { display: block; margin: 0 auto; width: 100%; height: auto; min-width: 560px; }
+    .figure svg { display: block; margin: 0 auto; width: 100%; height: auto; min-width: 620px; }
     .figure-caption { text-align: center; font-size: 12px; color: var(--faint); font-family: 'JetBrains Mono', monospace; margin-top: 10px; }
-
     table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; }
     th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
     th { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--subtle); }
     tr:last-child td { border-bottom: none; }
-
     footer { padding: 40px 0 60px; border-top: 1px solid var(--border); color: var(--faint); font-size: 14px; text-align: center; }
     footer a { color: var(--subtle); text-decoration: none; margin: 0 8px; }
     footer a:hover { color: var(--accent); }
-
-    @media (max-width: 600px) {
-      .article-header h1 { font-size: 24px; }
-      .article-header { padding: 44px 0 36px; }
-    }
+    @media (max-width: 600px) { .article-header h1 { font-size: 24px; } .article-header { padding: 44px 0 36px; } }
   </style>
 </head>
 <body>
@@ -167,8 +95,8 @@
       <h1>One Schema, Three Brands: Designing a Common Content Model</h1>
       <div class="article-meta">
         <span>April 2026</span>
-        <span>10 min read</span>
-        <span>Architecture · Platform Engineering</span>
+        <span>11 min read</span>
+        <span>System Design · Platform Engineering</span>
       </div>
     </div>
   </div>
@@ -177,69 +105,101 @@
     <div class="container">
 
       <p>
-        FOCUS Online, CHIP, and Bunte each modeled an article a little differently before this platform existed &mdash; same idea, different fields, different names for the same thing. Unifying them wasn't a redesign exercise. It was an audit: which fields were genuinely brand-specific, and which just looked that way after years of separate maintenance. The answer was almost entirely the latter. What came out of that audit &mdash; one schema, and a widget system built the same way &mdash; is what let six engineering teams extend a shared platform without a platform-team ticket for every change.
+        If you had to design a publishing platform from scratch for three brands &mdash; FOCUS Online, CHIP, Bunte &mdash; and the 20 engineering teams that ended up building on top of it, where would you actually start? Not with a database table. With the question every one of those teams and both of that content's audiences needs answered: an editor needs to write and preview an article; a reader needs it served fast, at the edge, with correctly sized images; and a team building a new content type needs to add one without waiting on a platform team. The system that answers all three ended up as five cooperating pieces, one schema running through all of them, and MongoDB Atlas as the only place any of them disagree about what's true.
       </p>
 
-      <h2>The audit: brand became a field, not a fork</h2>
+      <h2>The system, end to end</h2>
 
       <p>
-        Once the noise was filtered out, every brand's content shared the same shape: title, lead text, SEO title, lifecycle dates, a state machine, attribution back to a source. None of that needed to fork by brand &mdash; only <em>which</em> brand a piece of content belonged to needed to stay flexible, and that turned out to be a value, not a schema difference.
+        Strip away the code and this is the shape of it: an editor-facing CMS, a public renderer, a content API for everything else that needs to read or write, a scheduler for time-based state changes, and an edge layer that routes readers and handles image delivery &mdash; all reading and writing one shared MongoDB Atlas cluster, with a queue in between so legacy systems downstream hear about changes without being in the request path.
       </p>
 
+      <div class="figure">
+        <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="System diagram: the editor CMS, the content API, and the scheduler all write to MongoDB Atlas; Akamai routes readers to the renderer and serves images from S3; MongoDB Atlas changes notify a legacy event queue">
+          <defs>
+            <marker id="arrowM" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#5B9BD5"/>
+            </marker>
+          </defs>
+          <g font-family="JetBrains Mono, monospace" font-size="12" fill="#d4d4d4">
+            <rect x="10" y="20" width="140" height="55" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="80" y="43" text-anchor="middle" font-weight="700">CMS</text>
+            <text x="80" y="59" text-anchor="middle" fill="#999" font-size="10">editor CMS (Vue)</text>
+
+            <rect x="170" y="20" width="140" height="55" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="240" y="43" text-anchor="middle" font-weight="700">Content API</text>
+            <text x="240" y="59" text-anchor="middle" fill="#999" font-size="10">content API</text>
+
+            <rect x="330" y="20" width="140" height="55" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="400" y="43" text-anchor="middle" font-weight="700">Scheduler</text>
+            <text x="400" y="59" text-anchor="middle" fill="#999" font-size="10">state + channel cron</text>
+
+            <rect x="560" y="20" width="220" height="55" rx="8" fill="#1F4E79" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="670" y="43" text-anchor="middle" font-weight="700" fill="#fff">Akamai</text>
+            <text x="670" y="59" text-anchor="middle" fill="#cfe0f0" font-size="10">edge routing + Image Manager (S3 origin)</text>
+
+            <rect x="560" y="110" width="220" height="50" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="670" y="132" text-anchor="middle" font-weight="700">Renderer</text>
+            <text x="670" y="147" text-anchor="middle" fill="#999" font-size="10">public renderer</text>
+
+            <rect x="140" y="210" width="340" height="55" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="310" y="233" text-anchor="middle" font-weight="700">MongoDB Atlas</text>
+            <text x="310" y="249" text-anchor="middle" fill="#999" font-size="10">shared content store</text>
+
+            <rect x="520" y="210" width="250" height="55" rx="8" fill="#262626" stroke="#999" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="645" y="233" text-anchor="middle" font-weight="700">Legacy Event Queue</text>
+            <text x="645" y="249" text-anchor="middle" fill="#999" font-size="10">SQS / SNS</text>
+
+            <path d="M80,75 L80,150 L220,150 L220,210" fill="none" stroke="#5B9BD5" stroke-width="1.5" marker-end="url(#arrowM)"/>
+            <path d="M240,75 L280,150 L300,210" fill="none" stroke="#5B9BD5" stroke-width="1.5" marker-end="url(#arrowM)"/>
+            <path d="M400,75 L400,150 L370,210" fill="none" stroke="#5B9BD5" stroke-width="1.5" marker-end="url(#arrowM)"/>
+            <path d="M670,75 L670,110" fill="none" stroke="#5B9BD5" stroke-width="1.5" marker-end="url(#arrowM)"/>
+            <path d="M620,160 L440,210" fill="none" stroke="#5B9BD5" stroke-width="1.5" marker-end="url(#arrowM)"/>
+            <path d="M480,237 L520,237" fill="none" stroke="#999" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowM)"/>
+          </g>
+        </svg>
+        <div class="figure-caption">writes converge on Atlas; reads fan out through Akamai; changes leave through a queue, not a direct call</div>
+      </div>
+
       <table>
-        <thead><tr><th>What varied</th><th>How it's handled</th></tr></thead>
+        <thead><tr><th>Piece</th><th>Job</th></tr></thead>
         <tbody>
-          <tr><td>Which brand owns an entity</td><td>A shared <code>brand</code> enum (<code>bunte</code> / <code>chip</code> / <code>focus</code>), defined once and imported everywhere</td></tr>
-          <tr><td>Publishing lifecycle</td><td>One shared <code>state</code> enum: draft, schedule, publish, unpublish &mdash; same meaning for every entity</td></tr>
-          <tr><td>Rich content blocks</td><td>A discriminated union of block types (text, image, gallery, quote, CTA&hellip;), not a body schema per brand</td></tr>
-          <tr><td>Relations between entities</td><td>A custom <code>entityReference</code> / <code>entityMultiReference</code> keyword, since MongoDB has no foreign keys of its own</td></tr>
+          <tr><td>CMS</td><td>Editor-facing app &mdash; where a journalist writes, previews, and publishes</td></tr>
+          <tr><td>Content API</td><td>How every other team and the legacy CMS read or write content</td></tr>
+          <tr><td>Renderer</td><td>The actual page a reader sees, reached through Akamai</td></tr>
+          <tr><td>Scheduler</td><td>Cron layer &mdash; article state transitions every minute, channel updates every 10</td></tr>
+          <tr><td>Akamai</td><td>Edge routing between legacy and new domains, plus Image Manager in front of S3</td></tr>
         </tbody>
       </table>
 
       <p>
-        Every one of those primitives lives in a single shared package. No entity schema is allowed to redefine what a date, a brand, or a lifecycle state means &mdash; which is the difference between "brand" meaning the same thing everywhere in the platform, and meaning three subtly different things that happen to share a name.
+        Every one of those five talks to MongoDB Atlas through the same generated client library, not five different data-access layers &mdash; which is the first place the schema pays for itself: one collection shape, one set of indexes, understood identically whether you're the CMS writing a draft or the scheduler flipping a state at midnight.
       </p>
 
-      <h2>The schema generates everything downstream</h2>
+      <h2>The schema underneath all five</h2>
 
       <p>
-        Once that shape was right, the schema stopped being documentation. It became the only place these decisions get made &mdash; everything else is generated from it at build time, with a hard rule enforced by a comment at the top of every output file: modify the schema, not the generated code.
+        The audit that made one schema possible was straightforward once done properly: title, lead text, lifecycle dates, and a state machine were identical across all three brands. Only <em>which</em> brand an entity belonged to needed to stay flexible &mdash; so brand became an enum value, not a schema fork, defined once in a shared primitives package every entity imports.
       </p>
 
-      <div class="diagram">entity.schema.ts  (JSON Schema — single source of truth)
-   ├──▶ TypeScript interfaces        (schema-to-interface plugin)
-   ├──▶ MongoDB collection + indexes (manifest-extract plugin)
-   ├──▶ Swagger / API docs           (swagger-generator plugin)
-   └──▶ Runtime request validation   (same schema object, via ajv)</div>
+      <table>
+        <thead><tr><th>Shared primitive</th><th>Why it's centralized</th></tr></thead>
+        <tbody>
+          <tr><td><code>brand</code> enum</td><td>So "brand" means the same thing to the CMS, the content API, the renderer, and the scheduler &mdash; not three subtly different things</td></tr>
+          <tr><td><code>state</code> enum</td><td>draft / schedule / publish / unpublish, read identically by the scheduler cron and the renderer</td></tr>
+          <tr><td>Content block union</td><td>One discriminated set of block types (text, image, gallery, quote, CTA&hellip;) instead of a body shape per brand</td></tr>
+          <tr><td><code>entityReference</code></td><td>A custom schema keyword expressing relations MongoDB itself doesn't enforce</td></tr>
+        </tbody>
+      </table>
 
       <p>
-        The API layer follows the same instinct: one generic controller &mdash; list, get, post, put, delete, search, validate &mdash; instantiated once per registered entity, instead of a hand-written controller per entity per brand. Adding an entity means adding a schema package, not a route file.
+        From there, the schema generates everything downstream &mdash; TypeScript types, MongoDB indexes, Swagger docs, and the runtime validation on every write &mdash; from one file, with a build step that refuses to let generated output and schema drift apart.
       </p>
 
       <h2>A widget is five packages, wired in automatically</h2>
 
       <p>
-        The same discipline extends to content itself. A "widget" &mdash; a gallery, a quote block, a partner module &mdash; is up to five packages: <code>data-schema</code>, <code>rendering-page</code>, <code>editor-ui</code>, and <code>api</code>. A CLI command scaffolds all five from a template and registers each one exactly where it belongs, purely by naming convention:
-      </p>
-
-      <table>
-        <thead><tr><th>Package</th><th>Auto-wired into</th></tr></thead>
-        <tbody>
-          <tr><td><code>data-schema</code></td><td>Storage API, and the Renderer app too if the module has a page</td></tr>
-          <tr><td><code>rendering-page</code></td><td>Renderer app</td></tr>
-          <tr><td><code>editor-ui</code></td><td>Editor UI app</td></tr>
-          <tr><td><code>api</code></td><td>Editor API app</td></tr>
-        </tbody>
-      </table>
-
-      <p>
-        A team's first commit on a new widget is already integrated into all four applications &mdash; no platform-team review step, because the naming convention and the schema contract <em>are</em> the review.
-      </p>
-
-      <h3>One widget, three brands, one fallback</h3>
-
-      <p>
-        Brands don't get their own copy of a widget either. Rendering code has a <code>shared/</code> folder holding the real logic, and per-brand folders that override layout only where a brand actually needs to &mdash; falling back to a <code>default/</code> variant otherwise.
+        Content itself follows the same instinct. A widget &mdash; gallery, quote block, partner module &mdash; is up to five packages: <code>data-schema</code>, <code>rendering-page</code>, <code>editor-ui</code>, and <code>api</code>. A CLI generator scaffolds all five from a template and wires each into the right application purely by naming convention, and rendering falls back to a shared core unless a brand explicitly overrides it:
       </p>
 
       <div class="figure">
@@ -279,29 +239,51 @@
         <div class="figure-caption">every brand variant imports the same core logic; only layout differs</div>
       </div>
 
-      <h2>Monitoring three service groups without three dashboards</h2>
+      <h2>Frontend components: two different jobs, two different frameworks</h2>
 
       <p>
-        The platform isn't one service &mdash; it's several service groups, each with its own load balancer and log group. Rather than each building its own CloudWatch setup, there's one reusable monitoring module any service group plugs into, instantiated once per environment:
+        The CMS and the renderer aren't the same kind of frontend, and the platform doesn't pretend they are. The CMS is a Vue application &mdash; forms, validation, drag-and-drop layout, the kind of stateful UI an editor tool needs. The renderer is built for pure read-side rendering speed, kept deliberately lighter. Both consume the exact same generated TypeScript types from the schema, so "what a gallery widget looks like" is never defined twice, even though the two apps that render it don't share a rendering framework.
       </p>
 
-      <div class="diagram">Service group A (ALB + logs) ──┐
-Service group B (ALB + logs) ──┼──▶ shared monitoring module
-Service group C (ALB + logs) ──┘        │
-                                         ├──▶ CloudWatch dashboard (per group, one view)
-                                         ├──▶ error-rate alarm (metric math: 5xx / total)
-                                         └──▶ SNS ──▶ SQS ──▶ Lambda ──▶ Slack</div>
+      <h2>Images: S3 as origin, Akamai as everything else</h2>
 
       <p>
-        The alarm is a metric-math query &mdash; 5xx count divided by request count &mdash; so it stays meaningful whether a service handles ten requests a minute or ten thousand. A service group doesn't design its own alerting; it feeds in an ALB and a log group, and gets a dashboard, an alarm, and a Slack channel it didn't have to build.
+        An uploaded image is downloaded once and stored in S3 &mdash; that's the only origin. Every actual transformation &mdash; resize, crop, region-of-interest around a focal point &mdash; happens at request time through Akamai's Image Manager, driven by query parameters generated per-image, per-placement:
+      </p>
+
+      <pre><code>// Resize + focal-point-aware crop, generated on demand
+im=RegionOfInterestCrop=(480,272),regionOfInterest=(3858,2860)
+
+// URLs are hash-signed so Akamai only serves transforms this platform requested
+hash = sha256(hashSecret + path + queryString)</code></pre>
+
+      <p>
+        That split matters architecturally: the platform never stores a pre-cropped variant for every brand and every placement. It stores one image and a focal point, and lets the edge compute whatever crop a given layout needs, on demand, cached at Akamai rather than recomputed per request.
+      </p>
+
+      <h2>Infrastructure: one ALB per service group, one monitoring module for all of them</h2>
+
+      <p>
+        The CMS, the content API, and the renderer each sit behind their own Application Load Balancer &mdash; separate blast radius, separate scaling &mdash; provisioned from the same Terraform module rather than three hand-written stacks. Monitoring follows the same pattern instead of three bespoke dashboards:
+      </p>
+
+      <div class="diagram">CMS ALB + logs   ──┐
+API ALB + logs   ──┼──▶ shared monitoring module (per environment)
+Renderer ALB     ──┘        │
+                             ├──▶ CloudWatch dashboard (all three, one view)
+                             ├──▶ error-rate alarm (metric math: 5xx / total)
+                             └──▶ SNS ──▶ SQS ──▶ Lambda ──▶ Slack</div>
+
+      <p>
+        A service group doesn't design its own alerting. It feeds an ALB and a log group into the module and gets a dashboard, a metric-math error alarm, and a Slack channel it didn't have to build.
       </p>
 
       <div class="callout">
-        <strong>The same instinct, three times over:</strong> a shared schema instead of three content models, a shared widget system instead of three ways to build a content block, a shared monitoring module instead of three dashboards. None of it required more discipline from any one team &mdash; it required the underlying thing to be declared once, correctly, so extending it could be self-service.
+        <strong>The same instinct, five times over:</strong> one schema instead of three content models, one widget system instead of three ways to build a block, one ALB module instead of three load-balancer configs, one monitoring module instead of three dashboards, one image origin instead of per-brand pre-cropped variants. Nothing here required more discipline from any one team &mdash; it required the underlying thing to be declared once, so extending it could be self-service.
       </div>
 
       <div class="callout">
-        If you're auditing multiple systems that look different on the surface but share more structure than anyone's given them credit for, I'm reachable at <a href="mailto:rupam.speaks@gmail.com">rupam.speaks@gmail.com</a> or on <a href="https://www.linkedin.com/in/rupam-bhattacharya-29884714/" target="_blank" rel="noopener">LinkedIn</a>.
+        If you're designing a platform meant to be extended by teams that didn't build it, I'm reachable at <a href="mailto:rupam.speaks@gmail.com">rupam.speaks@gmail.com</a> or on <a href="https://www.linkedin.com/in/rupam-bhattacharya-29884714/" target="_blank" rel="noopener">LinkedIn</a>.
       </div>
 
     </div>

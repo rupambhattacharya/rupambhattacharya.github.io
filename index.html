@@ -363,10 +363,10 @@
           <h3>Self-Service Multi-Brand Publishing Platform</h3>
           <div class="meta">Burda Forward · 2018–2024</div>
           <p>
-            Audited the content fields FOCUS Online, CHIP, and Bunte actually used and designed a single JSON-Schema-driven content model &mdash; brand as a discriminator field rather than a schema fork &mdash; generating the TypeScript types, MongoDB indexes, API docs, and runtime validation from one source of truth, behind a fully generic REST layer with zero duplication of publishing logic across entities or brands.
+            Designed the system architecture and built the first production version of the shared content platform. Audited the content fields FOCUS Online, CHIP, and Bunte actually used and designed a single JSON-Schema-driven content model &mdash; brand as a discriminator field rather than a schema fork &mdash; generating the TypeScript types, MongoDB indexes, API docs, and runtime validation from one source of truth, behind a fully generic REST layer with zero duplication of publishing logic across entities or brands.
           </p>
           <p>
-            Built the widget system on top of it: a content module is up to five packages (data schema, rendering, editor UI, API), scaffolded and auto-wired into the right application by a CLI generator, with per-brand rendering that falls back to shared logic unless a brand overrides it. Six engineering teams extended the platform with new modules without a platform-team ticket.
+            Built the widget system on top of it: a content module is up to five packages (data schema, rendering, editor UI, API), scaffolded and auto-wired into the right application by a CLI generator, with per-brand rendering that falls back to shared logic unless a brand overrides it. 20 engineering teams extended the platform with new modules without a platform-team ticket.
           </p>
           <p>
             Owned the platform's local-development CLI, its AWS infrastructure as reusable Terraform modules (ECS Fargate/Spot, CloudFront/S3, MongoDB Atlas), a multi-stage GitLab CI pipeline, and a shared CloudWatch monitoring module that any service group could plug an ALB and log group into for a dashboard, error-rate alarms, and Slack alerts.
@@ -378,7 +378,7 @@
           <h3>Content Assembler &middot; Feed &amp; Partner Management</h3>
           <div class="meta">Burda Forward · 2018–2024</div>
           <p>
-            Refactored a legacy Java publishing integration into a config-driven Node.js/TypeScript service automating XML/JSON content ingestion from 200+ German partners, including Deutsche Welle, AFP, and Presse Portal. Onboarding a new partner became a feed configuration document, not a deploy.
+            Designed the system architecture and built the first production version, refactoring a legacy Java publishing integration into a config-driven Node.js/TypeScript service automating XML/JSON content ingestion from 200+ German partners, including Deutsche Welle, AFP, and Presse Portal &mdash; generating roughly 5,000 articles a day at full run rate. Onboarding a new partner became a feed configuration document, not a deploy.
           </p>
           <p>
             Designed feed and partner management so draft-vs-auto-publish is a config value per feed, not a code path &mdash; new or unproven sources default to editor review, trusted wire services can publish straight through. Partner contract data syncs from Salesforce on a schedule; a validation gate checks image credits, captions, and HTML before anything reaches an editor; scheduled jobs handle periodic fetch, content cleanup, and stalled-feed alerting.

@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>One Schema, Three Brands: Designing a Common Content Model — Rupam Bhattacharya</title>
-  <meta name="description" content="How auditing the fields actually used by three publishing brands led to a single JSON-Schema-driven content model — and how that one schema went on to generate the TypeScript types, the database layer, the API, and the validation for the whole platform.">
+  <meta name="description" content="Inside the self-service multi-brand publishing platform: auditing what FOCUS Online, CHIP, and Bunte actually shared, turning that into one schema, and a widget system six teams could extend without a platform-team ticket.">
   <meta name="author" content="Rupam Bhattacharya">
 
   <meta property="og:title" content="One Schema, Three Brands: Designing a Common Content Model">
-  <meta property="og:description" content="Finding the common fields across three publishing brands, and turning one JSON Schema into the single source of truth for types, database, API, and validation.">
+  <meta property="og:description" content="One schema, a five-package widget system, and a monitoring stack shared across service groups — the self-service platform behind three publishing brands.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://rupambhattacharya.github.io/writing/multi-brand-content-schema.html">
 
@@ -42,11 +42,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    .container {
-      max-width: var(--max-w);
-      margin: 0 auto;
-      padding: 0 24px;
-    }
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
 
     nav {
       position: sticky;
@@ -58,34 +54,13 @@
       padding: 14px 0;
       z-index: 100;
     }
-    nav .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    nav .brand {
-      font-weight: 600;
-      font-size: 15px;
-      color: var(--text);
-      text-decoration: none;
-    }
+    nav .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    nav .brand { font-weight: 600; font-size: 15px; color: var(--text); text-decoration: none; }
     nav .links { display: flex; gap: 20px; flex-wrap: wrap; }
-    nav .links a {
-      color: var(--subtle);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: color 0.15s;
-    }
+    nav .links a { color: var(--subtle); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.15s; }
     nav .links a:hover { color: var(--accent); }
 
-    /* Article header */
-    .article-header {
-      padding: 64px 0 48px;
-      border-bottom: 1px solid var(--border);
-    }
+    .article-header { padding: 64px 0 48px; border-bottom: 1px solid var(--border); }
     .back-link {
       display: inline-block;
       font-size: 13px;
@@ -95,30 +70,12 @@
       font-family: 'JetBrains Mono', monospace;
     }
     .back-link:hover { color: var(--accent); }
-    .article-header h1 {
-      font-size: 30px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.3;
-      margin-bottom: 16px;
-    }
-    .article-meta {
-      font-size: 13px;
-      color: var(--faint);
-      font-family: 'JetBrains Mono', monospace;
-    }
+    .article-header h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; margin-bottom: 16px; }
+    .article-meta { font-size: 13px; color: var(--faint); font-family: 'JetBrains Mono', monospace; }
     .article-meta span { margin-right: 20px; }
 
-    /* Body */
-    .article-body {
-      padding: 48px 0 80px;
-    }
-
-    .article-body p {
-      margin-bottom: 20px;
-      color: #2a2a2a;
-    }
-
+    .article-body { padding: 48px 0 80px; }
+    .article-body p { margin-bottom: 20px; color: #2a2a2a; }
     .article-body h2 {
       font-size: 11px;
       font-weight: 700;
@@ -127,30 +84,12 @@
       color: var(--accent);
       margin: 56px 0 20px;
     }
-
-    .article-body h3 {
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      margin: 36px 0 12px;
-    }
-
-    .article-body ul, .article-body ol {
-      padding-left: 22px;
-      margin-bottom: 20px;
-      color: #2a2a2a;
-    }
+    .article-body h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; margin: 36px 0 12px; }
+    .article-body ul, .article-body ol { padding-left: 22px; margin-bottom: 20px; color: #2a2a2a; }
     .article-body li { margin-bottom: 6px; }
-
-    .article-body a {
-      color: var(--accent);
-      text-decoration: none;
-      border-bottom: 1px solid transparent;
-      transition: border 0.15s;
-    }
+    .article-body a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border 0.15s; }
     .article-body a:hover { border-bottom-color: var(--accent); }
 
-    /* Callout */
     .callout {
       background: var(--accent-soft);
       border-left: 3px solid var(--accent);
@@ -161,15 +100,7 @@
     }
     .callout strong { color: var(--accent); }
 
-    /* Code */
-    code {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.875em;
-      background: #f3f4f6;
-      padding: 2px 6px;
-      border-radius: 3px;
-      color: #1a1a1a;
-    }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.875em; background: #f3f4f6; padding: 2px 6px; border-radius: 3px; color: #1a1a1a; }
     pre {
       background: var(--code-bg);
       color: var(--code-fg);
@@ -181,18 +112,12 @@
       font-size: 13px;
       line-height: 1.6;
     }
-    pre code {
-      background: none;
-      padding: 0;
-      color: inherit;
-      font-size: inherit;
-    }
+    pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
 
-    /* Diagram */
     .diagram {
       background: var(--code-bg);
       color: var(--code-fg);
-      padding: 28px 24px;
+      padding: 24px;
       border-radius: 6px;
       overflow-x: auto;
       margin: 24px 0;
@@ -201,63 +126,16 @@
       line-height: 1.6;
       white-space: pre;
     }
+    .figure { background: var(--code-bg); border-radius: 6px; overflow-x: auto; margin: 24px 0; padding: 20px; }
+    .figure svg { display: block; margin: 0 auto; width: 100%; height: auto; min-width: 560px; }
+    .figure-caption { text-align: center; font-size: 12px; color: var(--faint); font-family: 'JetBrains Mono', monospace; margin-top: 10px; }
 
-    /* Table */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 24px 0;
-      font-size: 14px;
-    }
-    th, td {
-      text-align: left;
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-    }
-    th {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--subtle);
-    }
+    table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    th { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--subtle); }
     tr:last-child td { border-bottom: none; }
 
-    /* Step list */
-    .steps { margin: 24px 0; }
-    .step {
-      display: flex;
-      gap: 16px;
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .step:last-child { border-bottom: none; }
-    .step-num {
-      width: 28px;
-      height: 28px;
-      background: var(--accent);
-      color: #fff;
-      border-radius: 50%;
-      font-size: 13px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .step-body p { margin-bottom: 6px; }
-    .step-body p:last-child { margin-bottom: 0; }
-    .step-body strong { font-weight: 600; }
-
-    /* Footer */
-    footer {
-      padding: 40px 0 60px;
-      border-top: 1px solid var(--border);
-      color: var(--faint);
-      font-size: 14px;
-      text-align: center;
-    }
+    footer { padding: 40px 0 60px; border-top: 1px solid var(--border); color: var(--faint); font-size: 14px; text-align: center; }
     footer a { color: var(--subtle); text-decoration: none; margin: 0 8px; }
     footer a:hover { color: var(--accent); }
 
@@ -288,9 +166,9 @@
       <a href="/#blog" class="back-link">← Blog</a>
       <h1>One Schema, Three Brands: Designing a Common Content Model</h1>
       <div class="article-meta">
-        <span>July 2026</span>
-        <span>12 min read</span>
-        <span>Architecture · Content Systems · TypeScript</span>
+        <span>April 2026</span>
+        <span>10 min read</span>
+        <span>Architecture · Platform Engineering</span>
       </div>
     </div>
   </div>
@@ -299,185 +177,131 @@
     <div class="container">
 
       <p>
-        When I joined the team building the self-service publishing platform behind FOCUS Online, CHIP, and Bunte, each brand had grown its own way of modeling an article. Not wildly different — they were all "a headline, some paragraphs, an image, a state" — but different enough in the details that treating them as the same entity was a real question, not an assumption. Before I wrote a line of the new platform's data model, I spent time doing something less glamorous than architecture: reading through what each brand's content actually looked like in practice and writing down, field by field, what was shared and what wasn't. That audit is the part of this story I'd want another engineer to hear, because the schema design that came out of it is the reason a 200+ publisher, 3-brand platform runs on one API today instead of three.
+        FOCUS Online, CHIP, and Bunte each modeled an article a little differently before this platform existed &mdash; same idea, different fields, different names for the same thing. Unifying them wasn't a redesign exercise. It was an audit: which fields were genuinely brand-specific, and which just looked that way after years of separate maintenance. The answer was almost entirely the latter. What came out of that audit &mdash; one schema, and a widget system built the same way &mdash; is what let six engineering teams extend a shared platform without a platform-team ticket for every change.
       </p>
 
-      <h2>Start with an audit, not a schema</h2>
+      <h2>The audit: brand became a field, not a fork</h2>
 
       <p>
-        The instinct when you're asked to unify three brands' content models is to start drawing boxes. I resisted that. The more useful first step was tabulating what fields each brand's content actually carried — title, lead text, SEO title, publish/unpublish dates, canonical URL, partner attribution — against which fields were brand-specific quirks that had accumulated over time rather than genuine differences in what an article is. Most of what looked like "brand-specific" turned out to be the same concept with a different name, or a field only one brand happened to be using because nobody had removed it. The genuine variation was much smaller than the apparent variation, and it mostly lived in one place: how the body of an article was structured.
-      </p>
-
-      <h3>What stayed common</h3>
-
-      <p>
-        Once the noise was filtered out, the shape that emerged was consistent across all three brands: an entity has a title, a lead text, an SEO title, a set of lifecycle dates (create, change, publish, unpublish), a state, and attribution back to a partner and a feed if it came from syndicated content. None of that needed to fork by brand. What did need to stay flexible was <em>which</em> brand a given piece of content, category, or feed belonged to — and that turned out to be a value, not a schema difference.
+        Once the noise was filtered out, every brand's content shared the same shape: title, lead text, SEO title, lifecycle dates, a state machine, attribution back to a source. None of that needed to fork by brand &mdash; only <em>which</em> brand a piece of content belonged to needed to stay flexible, and that turned out to be a value, not a schema difference.
       </p>
 
       <table>
-        <thead>
-          <tr><th>Entity</th><th>Collection</th><th>Brand handling</th></tr>
-        </thead>
+        <thead><tr><th>What varied</th><th>How it's handled</th></tr></thead>
         <tbody>
-          <tr><td>Content</td><td><code>contents</code></td><td>One shared schema; brand resolved via feed → partner chain or set directly on the document</td></tr>
-          <tr><td>Category</td><td><code>categories</code></td><td>Explicit <code>brand</code> enum field: <code>FOCUS Online</code>, <code>CHIP</code>, <code>Bunte</code></td></tr>
-          <tr><td>Feed</td><td><code>feeds</code></td><td>Brand-agnostic; per-feed mapping config handles partner-specific quirks</td></tr>
-          <tr><td>Partner</td><td><code>partners</code></td><td>Shared across brands; a partner can syndicate to more than one</td></tr>
+          <tr><td>Which brand owns an entity</td><td>A shared <code>brand</code> enum (<code>bunte</code> / <code>chip</code> / <code>focus</code>), defined once and imported everywhere</td></tr>
+          <tr><td>Publishing lifecycle</td><td>One shared <code>state</code> enum: draft, schedule, publish, unpublish &mdash; same meaning for every entity</td></tr>
+          <tr><td>Rich content blocks</td><td>A discriminated union of block types (text, image, gallery, quote, CTA&hellip;), not a body schema per brand</td></tr>
+          <tr><td>Relations between entities</td><td>A custom <code>entityReference</code> / <code>entityMultiReference</code> keyword, since MongoDB has no foreign keys of its own</td></tr>
         </tbody>
       </table>
 
       <p>
-        That single decision — <strong>brand is a field, not a fork</strong> — is what let three publishing pipelines become one. The alternative, which is what a rushed unification usually produces, is three parallel schemas with 90% overlapping fields and three parallel code paths to keep in sync forever. I'd rather spend the audit time up front than pay that tax on every future change.
+        Every one of those primitives lives in a single shared package. No entity schema is allowed to redefine what a date, a brand, or a lifecycle state means &mdash; which is the difference between "brand" meaning the same thing everywhere in the platform, and meaning three subtly different things that happen to share a name.
       </p>
 
-      <h3>What actually varied: the article body</h3>
+      <h2>The schema generates everything downstream</h2>
 
       <p>
-        The one place brands genuinely differed was in the kinds of content blocks an article could contain — quotes, embedded galleries, CTA buttons, partner-syndicated blocks, inline social embeds. Rather than pick a lowest common denominator (which would have broken brands that needed the richer blocks) or keep three separate body schemas (which would have broken the "one platform" goal), I modeled the body as a discriminated union: an array where every item is one of a fixed set of typed block schemas, disambiguated by a <code>type</code> field.
+        Once that shape was right, the schema stopped being documentation. It became the only place these decisions get made &mdash; everything else is generated from it at build time, with a hard rule enforced by a comment at the top of every output file: modify the schema, not the generated code.
       </p>
 
-      <ul>
-        <li><code>TEXT</code> — plain paragraph content, with an optional highlight-block flag</li>
-        <li><code>IMAGE</code> — with dimensions, focal point, credits, and its own lifecycle dates</li>
-        <li><code>GALLERY</code>, <code>ARTICLE</code> — references to other entities by UUID</li>
-        <li><code>QUOTE</code>, <code>SOCIAL</code>, <code>SCRIPT</code>, <code>RAW</code> — brand-specific embed and formatting needs</li>
-        <li><code>CTA</code> — affiliate and call-to-action buttons, one of the more field-heavy block types</li>
-        <li><code>PARTNER</code> — content attributed to and rendered on behalf of a syndication partner</li>
-      </ul>
-
-      <pre><code>export const ParagraphSubdocumentSchema: definitions.RelationalJSONSchema4 = {
-  title: 'IParagraphSubdocument',
-  type: 'object',
-  oneOf: [
-    TextParagraphSubdocumentSchema,
-    ImageParagraphSubdocumentSchema,
-    ScriptParagraphSubdocumentSchema,
-    SocialParagraphSubdocumentSchema,
-    ContentParagraphSubdocumentSchema,
-    GalleryParagraphSubdocumentSchema,
-    RawParagraphSubdocumentSchema,
-    QuoteParagraphSubdocumentSchema,
-    CTAParagraphSubdocumentSchema,
-    PartnerParagraphSubdocumentSchema,
-  ],
-};</code></pre>
+      <div class="diagram">entity.schema.ts  (JSON Schema — single source of truth)
+   ├──▶ TypeScript interfaces        (schema-to-interface plugin)
+   ├──▶ MongoDB collection + indexes (manifest-extract plugin)
+   ├──▶ Swagger / API docs           (swagger-generator plugin)
+   └──▶ Runtime request validation   (same schema object, via ajv)</div>
 
       <p>
-        Every brand uses a subset of this union; none of them needed a block type outside it. That's the part I'd point to as the actual "common schema" work — not just merging the top-level article fields, which was mostly straightforward, but finding the finite set of content-block shapes that covered every brand's editorial needs without over-generalizing into a schema so loose it stopped catching mistakes.
+        The API layer follows the same instinct: one generic controller &mdash; list, get, post, put, delete, search, validate &mdash; instantiated once per registered entity, instead of a hand-written controller per entity per brand. Adding an entity means adding a schema package, not a route file.
       </p>
 
-      <h2>Shared primitives, not copy-pasted definitions</h2>
+      <h2>A widget is five packages, wired in automatically</h2>
 
       <p>
-        Once the per-entity schemas were settled, a second-order problem showed up: the same concepts — a UUID, a date, the brand enum, the publishing state machine — were getting redefined slightly differently in each model file. That's the kind of drift that's invisible until a validation bug shows up in production because one schema's <code>state</code> enum quietly diverged from another's. The fix was a small shared package with the primitives defined exactly once:
+        The same discipline extends to content itself. A "widget" &mdash; a gallery, a quote block, a partner module &mdash; is up to five packages: <code>data-schema</code>, <code>rendering-page</code>, <code>editor-ui</code>, and <code>api</code>. A CLI command scaffolds all five from a template and registers each one exactly where it belongs, purely by naming convention:
       </p>
 
-      <pre><code>export const brand: JSONSchema4 = {
-  enum: ['bunte', 'chip', 'focus'],
-  description: 'Brand content',
-};
+      <table>
+        <thead><tr><th>Package</th><th>Auto-wired into</th></tr></thead>
+        <tbody>
+          <tr><td><code>data-schema</code></td><td>Storage API, and the Renderer app too if the module has a page</td></tr>
+          <tr><td><code>rendering-page</code></td><td>Renderer app</td></tr>
+          <tr><td><code>editor-ui</code></td><td>Editor UI app</td></tr>
+          <tr><td><code>api</code></td><td>Editor API app</td></tr>
+        </tbody>
+      </table>
 
-export const state: JSONSchema4 = {
-  enum: ['draft', 'schedule', 'publish', 'unpublish'],
-  description: `State in which entity can be found itself:
-  draft: Shown only in editor, not shown in OPM
-  schedule: Will be shown at future date, not shown in OPM presently
-  publish: Is visible in OPM
-  unpublish: Entity is expired and no longer accessible in OPM`,
-};
+      <p>
+        A team's first commit on a new widget is already integrated into all four applications &mdash; no platform-team review step, because the naming convention and the schema contract <em>are</em> the review.
+      </p>
 
-export const uuid: JSONSchema4 = { type: 'string', format: 'uuid' };
-export const date: JSONSchema4 = { type: 'object', instanceof: 'Date', tsType: 'Date' };</code></pre>
+      <h3>One widget, three brands, one fallback</h3>
 
-      <div class="callout">
-        <strong>The rule that made this stick:</strong> no entity schema is allowed to redefine what a date, a UUID, or a lifecycle state looks like. Every model imports these from one place. It's a small constraint, but it's the difference between "brand" meaning the same thing everywhere in the platform and "brand" meaning three subtly different things that happen to share a name.
+      <p>
+        Brands don't get their own copy of a widget either. Rendering code has a <code>shared/</code> folder holding the real logic, and per-brand folders that override layout only where a brand actually needs to &mdash; falling back to a <code>default/</code> variant otherwise.
+      </p>
+
+      <div class="figure">
+        <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: bunte, chip, focus, and default rendering folders all import the shared core logic">
+          <defs>
+            <marker id="arrow1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#5B9BD5"/>
+            </marker>
+          </defs>
+          <g font-family="JetBrains Mono, monospace" font-size="12" fill="#d4d4d4">
+            <rect x="15" y="20" width="150" height="55" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="90" y="44" text-anchor="middle" font-weight="700">bunte/</text>
+            <text x="90" y="60" text-anchor="middle" fill="#999" font-size="11">index.tsx</text>
+
+            <rect x="200" y="20" width="150" height="55" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="275" y="44" text-anchor="middle" font-weight="700">chip/</text>
+            <text x="275" y="60" text-anchor="middle" fill="#999" font-size="11">index.tsx</text>
+
+            <rect x="385" y="20" width="150" height="55" rx="8" fill="#262626" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="460" y="44" text-anchor="middle" font-weight="700">focus/</text>
+            <text x="460" y="60" text-anchor="middle" fill="#999" font-size="11">index.tsx</text>
+
+            <rect x="570" y="20" width="170" height="55" rx="8" fill="#262626" stroke="#999" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="655" y="40" text-anchor="middle" font-weight="700">default/</text>
+            <text x="655" y="56" text-anchor="middle" fill="#999" font-size="11">used if no override</text>
+
+            <rect x="150" y="150" width="470" height="55" rx="8" fill="#1F4E79" stroke="#5B9BD5" stroke-width="1.5"/>
+            <text x="385" y="172" text-anchor="middle" font-weight="700" fill="#fff">shared/ArticleWidgetModule.tsx</text>
+            <text x="385" y="190" text-anchor="middle" fill="#cfe0f0" font-size="11">core rendering logic, imported by every variant</text>
+
+            <path d="M90,75 L90,120 L385,120 L385,150" fill="none" stroke="#5B9BD5" stroke-width="1.5" marker-end="url(#arrow1)"/>
+            <path d="M275,75 L275,150" fill="none" stroke="#5B9BD5" stroke-width="1.5" marker-end="url(#arrow1)"/>
+            <path d="M460,75 L460,150" fill="none" stroke="#5B9BD5" stroke-width="1.5" marker-end="url(#arrow1)"/>
+            <path d="M655,75 L655,120 L385,120 L385,150" fill="none" stroke="#999" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow1)"/>
+          </g>
+        </svg>
+        <div class="figure-caption">every brand variant imports the same core logic; only layout differs</div>
       </div>
 
-      <h2>Relations without a relational database</h2>
+      <h2>Monitoring three service groups without three dashboards</h2>
 
       <p>
-        MongoDB doesn't give you foreign keys, but the platform's entities are genuinely relational — content references a feed, a feed references a partner, a paragraph block references an image or an article by UUID. Rather than lose that structure, the schema format itself was extended with two custom keywords: <code>entityReference</code> for a single relation to another entity, and <code>entityMultiReference</code> for a polymorphic relation resolved by a type discriminator — exactly the shape the paragraph union needed, since a <code>GALLERY</code> block and a <code>CTA</code> block relate to completely different target entities.
+        The platform isn't one service &mdash; it's several service groups, each with its own load balancer and log group. Rather than each building its own CloudWatch setup, there's one reusable monitoring module any service group plugs into, instantiated once per environment:
       </p>
 
-      <pre><code>export interface RelationalJSONSchema4 extends JSONSchema4 {
-  entityReference?: {
-    entityName: string;
-    bindingProperty: string;
-    entityPackageName: string;
-  };
-  entityMultiReference?: {
-    bindingProperty: string;
-    typeIdentifier: string;
-  };
-  properties?: { [k: string]: RelationalJSONSchema4 } | undefined;
-}</code></pre>
+      <div class="diagram">Service group A (ALB + logs) ──┐
+Service group B (ALB + logs) ──┼──▶ shared monitoring module
+Service group C (ALB + logs) ──┘        │
+                                         ├──▶ CloudWatch dashboard (per group, one view)
+                                         ├──▶ error-rate alarm (metric math: 5xx / total)
+                                         └──▶ SNS ──▶ SQS ──▶ Lambda ──▶ Slack</div>
 
       <p>
-        This is metadata JSON Schema doesn't natively have an opinion about, so encoding it directly in the schema — rather than in a separate relations config that could fall out of sync — meant relation information traveled with the field it described. A build-time tool could walk the schema tree and know exactly which fields pointed where, without a human maintaining a second document that says the same thing.
-      </p>
-
-      <h2>One schema, four generated artifacts</h2>
-
-      <p>
-        The payoff for doing the modeling work carefully is that the JSON Schema stopped being documentation and became the only place these decisions were ever expressed. Everything downstream — the TypeScript types, the database layer, the API documentation, the runtime validation — is generated from it, not maintained alongside it.
-      </p>
-
-      <div class="diagram">content.model.schema.ts  (JSON Schema — single source of truth)
-        │
-        ├──▶ schema-to-interface-plugin ──▶ content.model.interface.ts
-        │        (TypeScript interfaces, required-key types, generated at "rush build")
-        │
-        ├──▶ manifest-extract-databases-plugin ──▶ MongoDB collection + indexes
-        │        (collectionName, indexed fields, read from *.manifest.json)
-        │
-        ├──▶ postman-collection-plugin ──▶ Postman collection
-        │        (request/response shapes for API testing & docs)
-        │
-        └──▶ ajv (runtime) ──▶ request/response validation
-                 (the exact same schema object validates incoming API payloads)</div>
-
-      <p>
-        Every generated file carries the same header: <code>DO NOT MODIFY THIS FILE BY HAND — modify the JSON Schema and run "rush build" to regenerate it.</code> That convention is what makes the "single source of truth" claim actually true instead of aspirational — there's no second place for the type definition and the schema definition to quietly disagree, because one of them doesn't exist as hand-written code at all.
-      </p>
-
-      <h2>A generic API, not one per brand</h2>
-
-      <p>
-        The same discipline extends to the API layer. Instead of a controller per entity per brand, there's one generic controller factory — list, get, post, put, delete, search, validate — instantiated once per registered model:
-      </p>
-
-      <pre><code>registry.forEach((module, name) => {
-  router.get(`/${name}`, isApiKeyAuthorized('guest'),
-    (req, res, next) => controller.listControllerFactory(module)(req, res, next));
-  router.get(`/${name}/:id`, isApiKeyAuthorized('guest'), controller.getControllerFactory(module));
-  router.post(`/${name}`, isApiKeyAuthorized('admin'), controller.postControllerFactory(module));
-  router.put(`/${name}/:id`, isApiKeyAuthorized('admin'), controller.putControllerFactory(module));
-  router.delete(`/${name}/:id`, isApiKeyAuthorized('admin'), controller.deleteControllerFactory(module));
-  router.post(`/${name}/validate`, isApiKeyAuthorized('admin'), controller.validateControllerFactory(module));
-});</code></pre>
-
-      <p>
-        The registry itself — which entity names map to which model packages — is generated too, extracted from package.json naming conventions rather than hand-maintained. Adding a new entity to the platform means adding a schema package; it doesn't mean writing a new controller, a new route file, or a new validation layer. That's the concrete mechanism behind "zero duplication of publishing logic": duplication isn't avoided by discipline alone, it's structurally impossible, because there's only one code path and it's parameterized by the schema.
-      </p>
-
-      <h2>Feeds don't get to see the canonical schema</h2>
-
-      <p>
-        One more seam mattered: 200+ partners send content as XML, RSS, or JSON, in whatever shape their own systems produce, and none of that is the canonical schema. The importer service normalizes each partner's feed into the common Content shape through a declarative per-feed mapping configuration — an XPath or JSON-path per target field, an optional fallback value, and a set of rules for where to insert derived content blocks. The partner's format is free to be whatever it is; the mapping configuration is the only thing that needs to change when a new partner with a slightly different feed shape onboards, not the schema, not the API, not the storage layer.
-      </p>
-
-      <p>
-        That decoupling is what let the platform scale to 200+ publishers without the canonical model absorbing 200 publishers' worth of special cases. The variation lives in configuration, one layer removed from the model everything else in the platform depends on.
-      </p>
-
-      <h2>What I'd do again</h2>
-
-      <p>
-        The lesson I keep coming back to from this project isn't really about JSON Schema specifically — it's that the audit is the design work. The three-brand unification succeeded because "brand" ended up being data (an enum value, a mapping config) rather than a code fork, and that only happened because the fields that were genuinely brand-specific got separated from the fields that just looked that way from years of divergent maintenance. Once that separation was right, treating the schema as the single generative source for types, storage, API, and validation was the easy part — and it's the part that keeps three brands and 200+ publishers from ever drifting back apart.
+        The alarm is a metric-math query &mdash; 5xx count divided by request count &mdash; so it stays meaningful whether a service handles ten requests a minute or ten thousand. A service group doesn't design its own alerting; it feeds in an ALB and a log group, and gets a dashboard, an alarm, and a Slack channel it didn't have to build.
       </p>
 
       <div class="callout">
-        If you're working through a similar consolidation — multiple systems that look different on the surface but share more structure than anyone's given them credit for — I'm reachable at <a href="mailto:rupam.speaks@gmail.com">rupam.speaks@gmail.com</a> or on <a href="https://www.linkedin.com/in/rupam-bhattacharya-29884714/" target="_blank" rel="noopener">LinkedIn</a>.
+        <strong>The same instinct, three times over:</strong> a shared schema instead of three content models, a shared widget system instead of three ways to build a content block, a shared monitoring module instead of three dashboards. None of it required more discipline from any one team &mdash; it required the underlying thing to be declared once, correctly, so extending it could be self-service.
+      </div>
+
+      <div class="callout">
+        If you're auditing multiple systems that look different on the surface but share more structure than anyone's given them credit for, I'm reachable at <a href="mailto:rupam.speaks@gmail.com">rupam.speaks@gmail.com</a> or on <a href="https://www.linkedin.com/in/rupam-bhattacharya-29884714/" target="_blank" rel="noopener">LinkedIn</a>.
       </div>
 
     </div>

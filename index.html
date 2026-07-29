@@ -363,12 +363,39 @@
           <h3>Self-Service Multi-Brand Publishing Platform</h3>
           <div class="meta">Burda Forward · 2018–2024</div>
           <p>
-            Architected the shared content platform (Content Assembler) enabling self-service multi-brand publishing for FOCUS Online, CHIP, Bunte, and 200+ syndication partners. Audited the fields each brand actually used to design a single JSON-Schema-driven content model &mdash; brand as a discriminator field rather than a schema fork &mdash; that generates the TypeScript types, MongoDB indexes, API docs, and runtime validation from one source of truth, with a fully generic REST layer giving zero duplication of publishing logic across entities and brands. Vue and Angular front-ends with TypeScript, Node.js services on AWS, a reusable UI component library in Storybook, and Playwright/Cypress/supertest testing in CI.
+            Audited the content fields FOCUS Online, CHIP, and Bunte actually used and designed a single JSON-Schema-driven content model &mdash; brand as a discriminator field rather than a schema fork &mdash; generating the TypeScript types, MongoDB indexes, API docs, and runtime validation from one source of truth, behind a fully generic REST layer with zero duplication of publishing logic across entities or brands.
           </p>
           <p>
-            Also built and operated a Proxy API serving 5M+ daily targeted ad requests for FOCUS Online, owning reliability and observability end-to-end. Refactored a legacy Java publishing application into a cloud-native Node.js/TypeScript service while hiring and growing the team.
+            Built the widget system on top of it: a content module is up to five packages (data schema, rendering, editor UI, API), scaffolded and auto-wired into the right application by a CLI generator, with per-brand rendering that falls back to shared logic unless a brand overrides it. Six engineering teams extended the platform with new modules without a platform-team ticket.
           </p>
-          <div class="stack"><strong>Stack:</strong> Vue · Angular · TypeScript · Node.js · MongoDB · JSON Schema · AWS · Storybook · Playwright · Cypress</div>
+          <p>
+            Owned the platform's local-development CLI, its AWS infrastructure as reusable Terraform modules (ECS Fargate/Spot, CloudFront/S3, MongoDB Atlas), a multi-stage GitLab CI pipeline, and a shared CloudWatch monitoring module that any service group could plug an ALB and log group into for a dashboard, error-rate alarms, and Slack alerts.
+          </p>
+          <div class="stack"><strong>Stack:</strong> Vue · TypeScript · Node.js · MongoDB · JSON Schema · AWS (ECS Fargate, CloudFront, S3) · Terraform · GitLab CI · Storybook · Playwright · Cypress</div>
+        </div>
+
+        <div class="project">
+          <h3>Content Assembler &middot; Feed &amp; Partner Management</h3>
+          <div class="meta">Burda Forward · 2018–2024</div>
+          <p>
+            Refactored a legacy Java publishing integration into a config-driven Node.js/TypeScript service automating XML/JSON content ingestion from 200+ German partners, including Deutsche Welle, AFP, and Presse Portal. Onboarding a new partner became a feed configuration document, not a deploy.
+          </p>
+          <p>
+            Designed feed and partner management so draft-vs-auto-publish is a config value per feed, not a code path &mdash; new or unproven sources default to editor review, trusted wire services can publish straight through. Partner contract data syncs from Salesforce on a schedule; a validation gate checks image credits, captions, and HTML before anything reaches an editor; scheduled jobs handle periodic fetch, content cleanup, and stalled-feed alerting.
+          </p>
+          <div class="stack"><strong>Stack:</strong> Node.js · TypeScript · MongoDB · AWS · XML/JSON parsing · Salesforce API · Cron scheduling</div>
+        </div>
+
+        <div class="project">
+          <h3>Sentiment-Scoring Proxy API</h3>
+          <div class="meta">Burda Forward · 2018–2024</div>
+          <p>
+            Built and operated a Proxy API serving 5M+ daily targeted ad requests for FOCUS Online, CHIP, and Bunte, scoring every page view for brand-safety sentiment before ads could load against it, and owning reliability and observability end-to-end.
+          </p>
+          <p>
+            Cache-first architecture: Redis served the large majority of requests directly; a miss fell back to the content platform's DynamoDB, then a third-party sentiment API, writing the result back to cache. Since scores could shift roughly every 12 hours, an AWS Step Functions state machine proactively refreshed cached scores on that cycle instead of relying on request-time cache expiry.
+          </p>
+          <div class="stack"><strong>Stack:</strong> Node.js · Redis · AWS (DynamoDB, Step Functions, Lambda) · Third-party API integration</div>
         </div>
 
       </div>
@@ -480,8 +507,16 @@
 
         <ul class="post-list">
           <li>
-            <span class="date">2026-07</span>
+            <span class="date">2026-05</span>
+            <a href="writing/sentiment-scoring-proxy.html">A Sentiment-Scoring Proxy at 25M Requests</a>
+          </li>
+          <li>
+            <span class="date">2026-04</span>
             <a href="writing/multi-brand-content-schema.html">One Schema, Three Brands: Designing a Common Content Model</a>
+          </li>
+          <li>
+            <span class="date">2026-04</span>
+            <a href="writing/feed-partner-management.html">Automating Content Ingestion From 200+ Partners</a>
           </li>
           <li>
             <span class="date">2026-07</span>

@@ -363,12 +363,12 @@
           <h3>Self-Service Multi-Brand Publishing Platform</h3>
           <div class="meta">Burda Forward · 2018–2024</div>
           <p>
-            Architected the shared content platform enabling self-service multi-brand publishing across 200+ publishers. Vue and Angular front-ends with TypeScript, Node.js services on AWS, a reusable UI component library in Storybook, and Playwright/Cypress/supertest testing in CI. Designed for reusability with zero duplication of publishing logic.
+            Architected the shared content platform (Content Assembler) enabling self-service multi-brand publishing for FOCUS Online, CHIP, Bunte, and 200+ syndication partners. Audited the fields each brand actually used to design a single JSON-Schema-driven content model &mdash; brand as a discriminator field rather than a schema fork &mdash; that generates the TypeScript types, MongoDB indexes, API docs, and runtime validation from one source of truth, with a fully generic REST layer giving zero duplication of publishing logic across entities and brands. Vue and Angular front-ends with TypeScript, Node.js services on AWS, a reusable UI component library in Storybook, and Playwright/Cypress/supertest testing in CI.
           </p>
           <p>
             Also built and operated a Proxy API serving 5M+ daily targeted ad requests for FOCUS Online, owning reliability and observability end-to-end. Refactored a legacy Java publishing application into a cloud-native Node.js/TypeScript service while hiring and growing the team.
           </p>
-          <div class="stack"><strong>Stack:</strong> Vue · Angular · TypeScript · Node.js · AWS · Storybook · Playwright · Cypress</div>
+          <div class="stack"><strong>Stack:</strong> Vue · Angular · TypeScript · Node.js · MongoDB · JSON Schema · AWS · Storybook · Playwright · Cypress</div>
         </div>
 
       </div>
@@ -479,6 +479,10 @@
 
 
         <ul class="post-list">
+          <li>
+            <span class="date">2026-07</span>
+            <a href="writing/multi-brand-content-schema.html">One Schema, Three Brands: Designing a Common Content Model</a>
+          </li>
           <li>
             <span class="date">2026-07</span>
             <a href="writing/why-production-ai-systems-fail.html">Building Production AI Systems That Actually Work</a>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Google AI Overviews: A System Design Teardown — Rupam Bhattacharya</title>
+  <meta name="description" content="How Google serves grounded, cited answers to billions of queries in under three seconds — query fan-out, a separate passage-retrieval pipeline, and the three hard engineering problems: latency, grounding, and cost-aware model routing.">
+  <meta name="author" content="Rupam Bhattacharya">
+
+  <meta property="og:title" content="Google AI Overviews: A System Design Teardown">
+  <meta property="og:description" content="A production reference architecture for grounded RAG at planetary scale — query fan-out, decoupled retrieval and ranking, multi-turn handoff, and per-query model routing.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://rupambhattacharya.github.io/writing/google-ai-overviews-system-design.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fefefe;
+      --text: #1a1a1a;
+      --subtle: #666;
+      --faint: #999;
+      --accent: #1F4E79;
+      --accent-soft: #f0f4f8;
+      --border: #e8e8e8;
+      --code-bg: #1e1e1e;
+      --code-fg: #d4d4d4;
+      --max-w: 720px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(254, 254, 254, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      z-index: 100;
+    }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    nav .brand {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text);
+      text-decoration: none;
+    }
+    nav .links { display: flex; gap: 20px; flex-wrap: wrap; }
+    nav .links a {
+      color: var(--subtle);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    nav .links a:hover { color: var(--accent); }
+
+    /* Article header */
+    .article-header {
+      padding: 64px 0 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    .back-link {
+      display: inline-block;
+      font-size: 13px;
+      color: var(--subtle);
+      text-decoration: none;
+      margin-bottom: 28px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .back-link:hover { color: var(--accent); }
+    .article-header h1 {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+    .article-meta {
+      font-size: 13px;
+      color: var(--faint);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .article-meta span { margin-right: 20px; }
+
+    /* Body */
+    .article-body {
+      padding: 48px 0 80px;
+    }
+
+    .article-body p {
+      margin-bottom: 20px;
+      color: #2a2a2a;
+    }
+
+    .article-body h2 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin: 56px 0 20px;
+    }
+
+    .article-body h3 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin: 36px 0 12px;
+    }
+
+    .article-body ul, .article-body ol {
+      padding-left: 22px;
+      margin-bottom: 20px;
+      color: #2a2a2a;
+    }
+    .article-body li { margin-bottom: 6px; }
+
+    .article-body a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border 0.15s;
+    }
+    .article-body a:hover { border-bottom-color: var(--accent); }
+
+    /* Callout */
+    .callout {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      padding: 16px 20px;
+      margin: 28px 0;
+      font-size: 15px;
+      color: #2a2a2a;
+    }
+    .callout strong { color: var(--accent); }
+
+    /* Code */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875em;
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: #1a1a1a;
+    }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 22px 24px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+
+    /* Diagram */
+    .diagram {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 28px 24px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--subtle);
+    }
+    tr:last-child td { border-bottom: none; }
+
+    /* Step list */
+    .steps { margin: 24px 0; }
+    .step {
+      display: flex;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-body p { margin-bottom: 6px; }
+    .step-body p:last-child { margin-bottom: 0; }
+    .step-body strong { font-weight: 600; }
+
+    /* Footer */
+    footer {
+      padding: 40px 0 60px;
+      border-top: 1px solid var(--border);
+      color: var(--faint);
+      font-size: 14px;
+      text-align: center;
+    }
+    footer a { color: var(--subtle); text-decoration: none; margin: 0 8px; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .article-header h1 { font-size: 24px; }
+      .article-header { padding: 44px 0 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="/" class="brand">Rupam Bhattacharya</a>
+    <div class="links">
+      <a href="/#about">About</a>
+      <a href="/#work">Work</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#blog">Blog</a>
+      <a href="/#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="article-header">
+    <div class="container">
+      <a href="/#blog" class="back-link">← Blog</a>
+      <h1>Google AI Overviews: A System Design Teardown</h1>
+      <div class="article-meta">
+        <span>July 2026</span>
+        <span>12 min read</span>
+        <span>AI · RAG · System Design</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="article-body">
+    <div class="container">
+
+      <p>
+        By Google I/O 2026, Sundar Pichai put a number on the table that's worth sitting with: AI Overviews has over 2.5 billion monthly active users. That's not a feature flag rollout or a beta cohort — it's a retrieval-augmented generation system running at a scale most of us will never design for, returning grounded, cited answers in under three seconds, for query volumes that would knock over most production RAG stacks I've seen. As an architect, the interesting part isn't that Google put a language model in front of Search. It's the plumbing that makes a grounded answer possible at that scale without the system either drowning in latency or hallucinating itself into a PR incident. That plumbing is a legitimate reference architecture, and it's worth tearing down piece by piece.
+      </p>
+
+      <h2>It's RAG grounded in Search, not a standalone chatbot</h2>
+
+      <p>
+        The framing that trips people up is treating AI Overviews as "Gemini with a search box." Architecturally it's the reverse: a custom Gemini model sits on top of Google's existing retrieval infrastructure — the Search index, the Knowledge Graph, the Shopping Graph — and is constrained to generate from what that infrastructure retrieves in real time, not from parametric memory alone. Google's own description of the pairing is "advanced model capabilities with Google's best-in-class information systems." That distinction — model as a generation layer over retrieval, not a replacement for it — is the entire reason grounding is even possible here, and it's the same reason any RAG system you build should keep retrieval and generation as separately reasoned-about components rather than one opaque black box.
+      </p>
+
+      <h2>Query fan-out: the core innovation</h2>
+
+      <p>
+        The mechanism that actually makes AI Overviews different from a single embedding lookup is query fan-out. Instead of treating a user's question as one retrieval call, the system decomposes it into sub-topics and issues many queries against the index simultaneously. Google confirmed the mechanism directly at I/O 2025: "Under the hood, AI Mode uses our query fan-out technique, breaking down your question into subtopics and issuing a multitude of queries simultaneously." A Google engineer went further in comments to SEO researcher Marie Haynes, confirming that a dedicated, specialized version of Gemini generates the fan-out itself — decomposition is a distinct model responsibility, not a prompt-engineering trick bolted onto the main generation call.
+      </p>
+
+      <p>
+        Independent estimates put typical decomposition at 8–12 sub-queries, scaling past 20 for genuinely complex questions. The "Deep Search" mode inside AI Mode pushes this further still — reportedly issuing hundreds of queries and reasoning across the combined results to produce a fully-cited report. The design principle underneath all of it: a single retrieval call over a single query string is a weak approximation of what the user actually wants. Decomposing intent into parallel, narrower retrieval tasks and recombining the results is a strictly better use of the same retrieval budget — at the cost of an orchestration layer that has to fan work out and reconcile it back in under a hard latency ceiling.
+      </p>
+
+      <div class="diagram">User query
+   │
+   ▼
+Query fan-out (specialized Gemini model)
+   │  decomposes into sub-topics
+   ▼
+┌─────────┬─────────┬─────────┬─────────┐
+│ sub-q 1 │ sub-q 2 │ sub-q 3 │  ...8-12+│   parallel, async
+└────┬────┴────┬────┴────┬────┴────┬────┘
+     ▼          ▼         ▼         ▼
+   Passage-retrieval & scoring system
+   (separate from organic ranking; ~200ms)
+              │
+              ▼
+     Grounded generation (~1.2s, up to 5s+)
+     citations attached per passage
+              │
+              ▼
+     AI Overview rendered in Search
+              │
+              ▼ (optional follow-up)
+     AI Mode — heavier conversational
+     pipeline, retains original context</div>
+
+      <h2>Citations come from a separate scoring pass — not the ranking you'd expect</h2>
+
+      <h3>The five-phase flow</h3>
+
+      <p>
+        This is the piece I'd flag first in any design review, because it's the least intuitive and the most instructive. Network-traffic analysis published by Discovered Labs (worth treating as best-available third-party reverse-engineering rather than a Google-confirmed spec, since Google hasn't published these internals directly) describes a five-phase flow completing in roughly 2.5–3 seconds end to end:
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>Phase</th><th>What happens</th><th>Approx. timing</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1. Initial load</td><td>Page renders with an empty AI Overview container plus ML routing tokens</td><td>—</td></tr>
+          <tr><td>2. Async dispatch</td><td>A dedicated <code>/async/folsrch</code> endpoint is called in the background</td><td>—</td></tr>
+          <tr><td>3. Retrieval &amp; scoring</td><td>Server-side retrieval, query classification, and passage scoring — decides which sources get cited, and whether an overview shows at all</td><td>~200ms</td></tr>
+          <tr><td>4. Generation</td><td>LLM inference over the scored passages, grounded generation with citations</td><td>~1.2s (up to 5s+ for complex queries)</td></tr>
+          <tr><td>5. Delivery</td><td>Response returned as an HTML fragment injected into the waiting container</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        The detail that matters most architecturally: citation selection runs through a passage-retrieval and scoring system that is <strong>separate from organic search ranking</strong>. Passages are extracted and scored independently against the sub-queries from fan-out, which means a page ranked #15 organically — but structured as a clean, self-contained, well-scoped answer block — can get cited over the page ranked #1. Organic ranking optimizes for "best page for this query, considering link graph, engagement, and dozens of other signals." Citation scoring optimizes for "best extractable passage to ground this specific sub-answer." Those are different objective functions, and Google's architecture treats them as different systems rather than forcing one ranking model to serve both purposes badly.
+      </p>
+
+      <div class="callout">
+        <strong>The transferable lesson:</strong> if you're building RAG over your own corpus and you're reusing your existing search-relevance ranking as your retrieval-for-generation signal, you're probably scoring the wrong thing. Ranking-for-humans-to-click and ranking-for-a-model-to-extract-a-grounded-passage are different problems. Score them separately, even if they share an index.
+      </div>
+
+      <h2>Multi-turn: the handoff to AI Mode</h2>
+
+      <p>
+        AI Overviews support follow-up questions asked directly from the summary, which transition the user into AI Mode — a distinct, genuinely heavier Gemini-powered conversational pipeline that retains context from the original search so the user isn't starting over. Traffic analysis suggests AI Mode routes through multiple backend services and runs several seconds on average, well beyond the sub-3-second budget of the initial overview. It also taps a wider source set: web content plus the Knowledge Graph, Shopping Graph, and, opt-in, personal context from Gmail. Splitting these into two pipelines — a fast, tightly-scoped initial answer and a slower, richer conversational mode entered only on demand — is a sensible latency/capability trade that most teams building "answer now, converse later" products would do well to copy directly.
+      </p>
+
+      <h2>Grounding controls, and the failure that shaped them</h2>
+
+      <p>
+        Google's grounding stack, documented on the Vertex AI side, includes Grounding with Google Search (with dynamic retrieval), a high-fidelity mode specifically to reduce hallucination, a Check Grounding API, and DeepMind's FACTS Grounding benchmark — 1,719 examples measuring how faithfully a model's long-form answer sticks to the documents it was given, with Gemini 2.0 Flash topping the leaderboard at launch with an 83.6% factuality score.
+      </p>
+
+      <p>
+        None of that stack existed in its current form at the May 2024 launch, and the reason is instructive. Early AI Overviews produced viral failures — recommending glue on pizza, telling users to eat rocks — traced to the model surfacing sarcastic or troll content from forums (a Reddit joke, in the pizza case) without detecting that it was satire. Liz Reid, Google's Head of Search, defended the underlying feature but shipped real restrictions in response: limiting reliance on user-generated content, pausing AI Overviews entirely on high-stakes categories like health queries, and adding specific detection for nonsensical or satirical trigger patterns. This is the incident-to-guardrail loop working as intended — the uncomfortable part is that it took a public, viral failure to surface a gap that better source-quality classification should have caught pre-launch. It's a useful reminder that "we have a grounding benchmark" and "we have a grounding benchmark that catches satire" are not the same claim.
+      </p>
+
+      <h2>The three hard engineering problems</h2>
+
+      <p>
+        Everything above collapses into three problems that would dominate any design review for a system like this, and they're the three I'd actually want to talk through with an interviewer or a colleague sizing up similar work:
+      </p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <p><strong>Latency.</strong> Fan-out into 8–20+ sub-queries, a separate retrieval-and-scoring pass, then generation — all inside a budget where users start bouncing well before 3 seconds. Every stage above is a candidate for the tail-latency budget, and the system has to hit it while doing strictly more work than a traditional single-shot search result.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <p><strong>Grounding and attribution.</strong> Citations have to be defensible enough to survive public scrutiny at 2.5 billion monthly users, which means the passage-scoring system carries as much product risk as the generation model itself — and the 2024 launch incidents show what happens when source-quality classification lags behind generation quality.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <p><strong>Cost-aware model routing.</strong> The ML routing tokens visible in the initial page load point at a per-query routing layer choosing which model variant handles a given query, balancing quality against inference cost at a volume where even small per-query savings compound into enormous totals.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>The cost the architecture doesn't show you</h2>
+
+      <p>
+        One consequence of this design is worth naming even though it isn't a system-design problem so much as a market-structure one: AI Overviews measurably suppress outbound clicks from Search. Pew Research (July 2025, based on 900 US adults across roughly 69,000 searches) found that when users encountered an AI summary, they clicked a traditional search-result link in only 8% of visits, versus 15% without one — and just 1% clicked a link inside the summary itself, despite 88% of summaries citing three or more sources. A grounded, cited, well-engineered answer still means fewer visits to the pages that supplied the grounding. It's the strategic backdrop to the entire "Answer Engine Optimization" industry that's sprung up around getting cited in exactly this kind of passage-retrieval pass — and a reminder that a technically excellent RAG system can still reshape the economics of everyone downstream of it, independent of how well it was built.
+      </p>
+
+      <h2>What I'd take from this into any RAG system I build</h2>
+
+      <p>
+        Strip away the Google-scale specifics and four decisions here generalize directly to any RAG system worth building seriously: decompose intent into parallel sub-queries instead of one retrieval call per question; score retrieval-for-generation as a genuinely separate objective from retrieval-for-ranking, even over the same index; budget latency per pipeline stage rather than end-to-end, so you know which stage to optimize when the SLA slips; and route per-query to the cheapest model that can still clear your quality bar, rather than running every query through your most expensive one by default. None of these are Google-specific tricks. They're what "grounded generation at scale" actually requires once you get past the demo.
+      </p>
+
+      <div class="callout">
+        If you're working on RAG architecture, grounding, or retrieval-scoring systems and want to compare notes, I'm reachable at <a href="mailto:rupam.speaks@gmail.com">rupam.speaks@gmail.com</a> or on <a href="https://www.linkedin.com/in/rupam-bhattacharya-29884714/" target="_blank" rel="noopener">LinkedIn</a>.
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    &copy; 2026 Rupam Bhattacharya &middot; Munich, Germany
+  </div>
+</footer>
+
+</body>
+</html>
